@@ -39,10 +39,10 @@ if [[ $CHOICE == "1" ]] ; then
 
   tput setaf 2
   echo "#############################################################################################"
-  echo "#########        Let us build the package in CHROOT ~/Documents/chroot-data"
+  echo "#########        Let us build the package in CHROOT ~/Documents/chroot-archlinux"
   echo "#############################################################################################"
   tput sgr0
-  CHROOT=$HOME/Documents/chroot-data
+  CHROOT=$HOME/Documents/chroot-archlinux
   arch-nspawn $CHROOT/root pacman -Syu
   makechrootpkg -c -r $CHROOT
 

@@ -1,0 +1,24 @@
+post_install() {
+
+    if [ -d /etc/skel/.config/sunset/chadwm ]; then
+        cd /etc/skel/.config/sunset/chadwm
+    else
+        echo "Error: Directory /etc/skel/.config/sunset/chadwm not found!"
+        return 1
+    fi
+    if [ ! -f /usr/local/bin/sunset ]; then
+        echo -e "\n** Making Sunset **\n"
+        make -B
+        echo -e "\n** Installing Sunset **\n"
+        make install
+        echo
+        echo -e "\n** The files have been installed in /etc/skel/.config/sunset **\n"
+        echo
+        echo "Sunset like Dwm needs to be build from your config"
+        echo
+    fi 
+}
+
+post_upgrade() {
+    post_install
+}

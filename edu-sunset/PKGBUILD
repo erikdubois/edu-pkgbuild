@@ -1,0 +1,92 @@
+# Maintainer: Erik Dubois <erik.dubois@gmail.com>
+pkgname=edu-sunset-git
+_pkgname=sunset
+_destname1="/etc/skel/.config/sunset/"
+#_destname2="/etc/skel/.bin/"
+#_destname3="/usr/share/licenses/dwm/"
+#_destname4="/usr/share/man/man1/"
+_destname5="/usr/bin/"
+_destname6="/usr/share/xsessions/"
+#_licensedir="/usr/share/arcolinux/licenses/"
+pkgver=24.07
+pkgrel=01
+pkgdesc="Configuration files for ArcoLinux Iso"
+arch=('any')
+url="https://github.com/erikdubois/"
+license=('GPL3')
+makedepends=('git')
+depends=(
+'alacritty'
+'arandr'
+'arcolinux-dwm-st-git'
+'arcolinux-nlogout-git'
+'arcolinux-powermenu-git'
+'arcolinux-rofi-git'
+'arcolinux-rofi-themes-git'
+'btop'
+'dash'
+'dex'
+'eww'
+'feh'
+'flameshot-git'
+'gnome-screenshot'
+'go'
+'imlib2'
+'lxappearance'
+'maim'
+'numlockx'
+'picom'
+'rofi-lbonn-wayland'
+'scrot'
+'slock'
+'sxhkd'
+'ttf-jetbrains-mono-nerd'
+'wget'
+'xclip'
+'xfce4-screenshooter'
+'xorg-server'
+'xorg-xrandr'
+'xorg-xsetroot'
+)
+optdepends=('arcolinux-sunset-pacman-hook-git')
+conflicts=()
+provides=("${pkgname}")
+options=(!strip !emptydirs)
+source=($_pkgname::git+$url$_pkgname.git)
+sha256sums=('SKIP')
+install='readme.install'
+
+# build() {
+#   cd $srcdir/$_pkgname
+#   ./rebuild
+# }
+
+package() {
+
+	#install -dm755 ${pkgdir}${_licensedir}${_pkgname}
+	#install -m644  ${srcdir}/${_pkgname}/LICENSE ${pkgdir}${_licensedir}${_pkgname}
+
+	install -dm755 ${pkgdir}${_destname1}
+	cp -r  ${srcdir}/${_pkgname}/* ${pkgdir}${_destname1}
+
+	#install -dm755 ${pkgdir}${_destname2}
+	#cp -r  ${srcdir}/${_pkgname}${_destname2}* ${pkgdir}${_destname2}
+
+	#install -dm755 ${pkgdir}${_destname3}
+	#cp -r  ${srcdir}/${_pkgname}${_destname3}* ${pkgdir}${_destname3}
+
+	#install -dm755 ${pkgdir}${_destname4}
+	#cp -r  ${srcdir}/${_pkgname}${_destname4}* ${pkgdir}${_destname4}
+
+	echo $srcdir
+	echo $_pkgname
+  cd ${srcdir}/${_pkgname}
+  #make PREFIX=/usr DESTDIR="$pkgdir" install
+  ./rebuild.sh
+	install -dm755 ${pkgdir}${_destname5}
+	cp -r  ${srcdir}/${_pkgname}sunset ${pkgdir}${_destname5}
+	
+	install -dm755 ${pkgdir}${_destname6}
+	cp -r  ${srcdir}/${_pkgname}*.desktop ${pkgdir}${_destname6}
+
+}
