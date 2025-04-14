@@ -1,7 +1,7 @@
 # Maintainer: Erik Dubois <erik.dubois@gmail.com>
 pkgname=surfn-plasma-flow-git
 _pkgname=surfn-plasma-flow
-pkgver=23.12
+pkgver=25.04
 pkgrel=01
 _destname1="/usr/share/icons/"
 _destname2="/usr/share/plasma/"
