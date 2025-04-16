@@ -1,8 +1,8 @@
 # Maintainer: Erik Dubois <erik.dubois@gmail.com>
-pkgname=neo-candy-icons
+pkgname=neo-candy-icons-git
 _pkgname=neo-candy-icons
 pkgver=25.04
-pkgrel=04
+pkgrel=05
 _destname1="/usr/share/icons/"
 #_destname2="/usr/share/plasma/"
 pkgdesc="Neo candy icons"

@@ -1,0 +1,21 @@
+# Maintainer: Erik Dubois <erik.dubois@gmail.com>
+pkgname=edu-shells-git
+_pkgname=edu-shells
+_destname1="/etc/skel/"
+pkgver=25.04
+pkgrel=01
+pkgdesc="configs for bash, zsh and fish"
+arch=('any')
+url="https://github.com/erikdubois/edu-shells"
+license=('GPL3')
+makedepends=('git' 'most')
+depends=('bash')
+provides=("${pkgname}")
+options=(!strip !emptydirs)
+source=(${_pkgname}::"git+https://github.com/erikdubois/${_pkgname}.git")
+sha256sums=('SKIP')
+install='readme.install'
+package() {
+    install -dm755 "${pkgdir}${_destname1}"
+    cp -a "${srcdir}/${_pkgname}${_destname1}".* "${pkgdir}${_destname1}"
+}

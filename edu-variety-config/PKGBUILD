@@ -1,11 +1,11 @@
 # Maintainer: Erik Dubois <erik.dubois@gmail.com>
-pkgname=arconet-variety-config
-_pkgname=arconet-variety-config
+pkgname=edu-variety-config-git
+_pkgname=edu-variety-config
 _destname1="/etc/skel/.config/variety/"
 _licensedir="/usr/share/arcolinux/licenses/"
 pkgver=25.04
-pkgrel=01
-pkgdesc="variety config for arconet"
+pkgrel=02
+pkgdesc="variety config for edu"
 arch=('any')
 url="https://github.com/erikdubois//$pkgname"
 license=('GPL3')

@@ -1,24 +1,25 @@
 # Maintainer: Erik Dubois <erik.dubois@gmail.com>
-pkgname=arcolinux-rofi-themes-git
-_pkgname=arcolinux-rofi-themes
-_destname1="/usr/share/rofi/themes/"
-_licensedir="/usr/share/arcolinux/licenses/"
+pkgname=edu-plasma-keybindings-git
+_pkgname=edu-plasma-keybindings
+_destname="/etc"
+_licensedir="/usr/share/edu/licenses/"
 pkgver=25.04
 pkgrel=01
-pkgdesc="Rofi themes created for ArcoLinux"
+pkgdesc="Kservice files for edu"
 arch=('any')
-url="https://github.com/erikdubois/arcolinux-Rofi-Themes"
+url="https://github.com/erikdubois/${_pkgname}"
 license=('GPL3')
 makedepends=('git')
+conflicts=()
 depends=()
 provides=("${pkgname}")
 options=(!strip !emptydirs)
 source=(${_pkgname}::"git+https://github.com/erikdubois/${_pkgname}.git")
 sha256sums=('SKIP')
+install='readme.install'
 package() {
 	install -dm755 ${pkgdir}${_licensedir}${_pkgname}
 	install -m644  ${srcdir}/${_pkgname}/LICENSE ${pkgdir}${_licensedir}${_pkgname}
 
-	install -dm755 ${pkgdir}${_destname1}
-	install -m644  ${srcdir}/${_pkgname}${_destname1}* ${pkgdir}${_destname1}
+	cp -r  ${srcdir}/${_pkgname}${_destname} ${pkgdir}${_destname}
 }
