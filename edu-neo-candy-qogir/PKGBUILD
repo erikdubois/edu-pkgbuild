@@ -1,16 +1,16 @@
 # Maintainer: Erik Dubois <erik.dubois@gmail.com>
-pkgname=edu-papirus-dark-tela-git
-_pkgname=edu-papirus-dark-tela
+pkgname=edu-neo-candy-qogir-git
+_pkgname=edu-neo-candy-qogir
 pkgver=25.04
-pkgrel=02
+pkgrel=03
 _destname1="/usr/share/icons/"
-pkgdesc="Papirus dark icons with Tela folders"
+pkgdesc="Beautyline icons completed for ArcoLinux + Candy icons + Qogir icons"
 arch=('any')
 url="https://github.com/erikdubois/${_pkgname}.git"
 license=('GPL3')
-depends=('papirus-icon-theme')
-makedepends=('git')
+depends=('neo-candy-icons-git')
 replaces=()
+makedepends=('git')
 provides=("${pkgname}")
 conflicts=()
 options=(!strip !emptydirs)

@@ -1,27 +1,22 @@
 # Maintainer: Erik Dubois <erik.dubois@gmail.com>
-pkgname=edu-candy-beauty-arc-mint-red-git
-_pkgname=edu-candy-beauty-arc-mint-red
+pkgname=edu-neo-candy-arc-mint-red-git
+_pkgname=edu-neo-candy-arc-mint-red
 pkgver=25.04
-pkgrel=01
+pkgrel=08
 _destname1="/usr/share/icons/"
-_destname2="/usr/share/plasma/"
 pkgdesc="Beautyline icons completed for ArcoLinux + Candy icons + Mint icons"
 arch=('any')
 url="https://github.com/erikdubois/${_pkgname}.git"
 license=('GPL3')
 depends=('neo-candy-icons-git')
+replaces=()
 makedepends=('git')
 provides=("${pkgname}")
-replaces=('arcolinux-candy-beauty-arc-mint-red-git')
 conflicts=()
 options=(!strip !emptydirs)
 source=(${_pkgname}::"git+${url}")
 sha256sums=('SKIP')
 package() {
 	install -dm 755 ${pkgdir}${_destname1}
-	install -dm 755 ${pkgdir}${_destname2}
-	rm ${srcdir}/${_pkgname}/git*
-	rm ${srcdir}/${_pkgname}/setup*
-    cp -r ${srcdir}/${_pkgname}/.icons/* ${pkgdir}${_destname1}
-	cp -r ${srcdir}/${_pkgname}/.icons/* ${pkgdir}${_destname2}
+    cp -r ${srcdir}/${_pkgname}${_destname1}/* ${pkgdir}${_destname1}
 }
