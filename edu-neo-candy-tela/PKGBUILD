@@ -1,0 +1,23 @@
+# Maintainer: Erik Dubois <erik.dubois@gmail.com>
+
+pkgname=edu-neo-candy-tela-git
+_pkgname=edu-neo-candy-tela
+pkgver=25.04
+pkgrel=05
+pkgdesc="Beautyline icons completed for ArcoLinux + Candy icons + Tela"
+arch=('any')
+url="https://github.com/erikdubois/${_pkgname}.git"
+license=('GPL3')
+depends=('neo-candy-icons-git')
+makedepends=('git')
+replaces=('arcolinux-candy-beauty-tela-git')
+provides=("${pkgname}")
+conflicts=()
+options=(!strip !emptydirs)
+source=("${_pkgname}::git+${url}")
+sha256sums=('SKIP')
+
+package() {
+    install -dm755 "${pkgdir}/usr/share/icons"
+    cp -r "${srcdir}/${_pkgname}/usr/share/icons/"* "${pkgdir}/usr/share/icons/"
+}

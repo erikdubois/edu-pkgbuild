@@ -1,15 +1,14 @@
 # Maintainer: Erik Dubois <erik.dubois@gmail.com>
 pkgname=edu-candy-beauty-arc-git
 _pkgname=edu-candy-beauty-arc
-pkgver=23.12
-pkgrel=01
+pkgver=25.04
+pkgrel=04
 _destname1="/usr/share/icons/"
-_destname2="/usr/share/plasma/"
 pkgdesc="Beautyline icons completed for ArcoLinux + Candy icons + Arc icons"
 arch=('any')
 url="https://github.com/erikdubois/${_pkgname}.git"
 license=('GPL3')
-depends=('a-candy-beauty-icon-theme-git')
+depends=('neo-candy-icons-git')
 replaces=('arcolinux-candy-beauty-arc-git')
 makedepends=('git')
 provides=("${pkgname}")
@@ -19,12 +18,5 @@ source=(${_pkgname}::"git+${url}")
 sha256sums=('SKIP')
 package() {
 	install -dm 755 ${pkgdir}${_destname1}
-	install -dm 755 ${pkgdir}${_destname2}
-	#remove these three files or not - it has no effect
-	rm ${srcdir}/${_pkgname}/git*
-	rm ${srcdir}/${_pkgname}/setup*
-	rm ${srcdir}/${_pkgname}/README.md
-	cd edu-candy-beauty-arc/iconfolder
-	cp -dr --no-preserve='ownership' edu-candy-beauty-arc "${pkgdir}"/usr/share/icons/
-	cp -dr --no-preserve='ownership' edu-candy-beauty-arc "${pkgdir}"/usr/share/plasma/
+    cp -r ${srcdir}/${_pkgname}${_destname1}/* ${pkgdir}${_destname1}
 }

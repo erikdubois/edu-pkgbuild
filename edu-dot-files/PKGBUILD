@@ -1,0 +1,40 @@
+# Maintainer: Erik Dubois <erik.dubois@gmail.com>
+
+pkgname=edu-dot-files-git
+_pkgname=edu-dot-files
+pkgver=25.04
+pkgrel=10
+pkgdesc="System-wide and user dotfiles (by Erik Dubois)"
+arch=('any')
+url="https://github.com/erikdubois/edu-dot-files"
+license=('GPL3')
+makedepends=('git')
+depends=('bash')
+provides=('edu-dot-files')
+conflicts=(
+'arcolinux-bin-git'
+'arcolinux-system-config-git'
+'arcolinux-bootloader-systemd-boot-git'
+'arcolinux-config-all-desktops-git'
+'arcolinux-alacritty-git'
+'arcolinux-btop-git'
+'arcolinux-gtk-surfn-arc-git'
+'arcolinux-config-all-desktops-git'
+'arcolinux-paru-git'
+'arcolinux-qt5-git'
+)
+options=(!strip !emptydirs)
+source=("${_pkgname}::git+https://github.com/erikdubois/${_pkgname}.git")
+sha256sums=('SKIP')
+
+package() {
+    local _install_paths=(/etc /usr)
+
+    for _path in "${_install_paths[@]}"; do
+        if [[ -d "${srcdir}/${_pkgname}${_path}" ]]; then
+            echo "Installing files to ${_path}"
+            install -dm755 "${pkgdir}${_path}"
+            cp -a "${srcdir}/${_pkgname}${_path}/." "${pkgdir}${_path}/"
+        fi
+    done
+}

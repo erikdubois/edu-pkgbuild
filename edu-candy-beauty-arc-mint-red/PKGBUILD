@@ -1,7 +1,7 @@
 # Maintainer: Erik Dubois <erik.dubois@gmail.com>
 pkgname=edu-candy-beauty-arc-mint-red-git
 _pkgname=edu-candy-beauty-arc-mint-red
-pkgver=23.12
+pkgver=25.04
 pkgrel=01
 _destname1="/usr/share/icons/"
 _destname2="/usr/share/plasma/"
@@ -9,7 +9,7 @@ pkgdesc="Beautyline icons completed for ArcoLinux + Candy icons + Mint icons"
 arch=('any')
 url="https://github.com/erikdubois/${_pkgname}.git"
 license=('GPL3')
-depends=('a-candy-beauty-icon-theme-git')
+depends=('neo-candy-icons-git')
 makedepends=('git')
 provides=("${pkgname}")
 replaces=('arcolinux-candy-beauty-arc-mint-red-git')

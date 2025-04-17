@@ -24,6 +24,43 @@
 #tput setaf 7 = gray 
 #tput setaf 8 = light blue
 
+PKGBUILD="PKGBUILD"
+
+# Ensure PKGBUILD exists
+[[ ! -f $PKGBUILD ]] && { echo "No PKGBUILD found."; exit 1; }
+
+# Read pkgname
+pkgname=$(grep -E '^pkgname=' "$PKGBUILD" | cut -d= -f2)
+
+# Only proceed if pkgname starts with 'edu-'
+if [[ "$pkgname" != edu-* ]]; then
+    echo "Skipping: pkgname '$pkgname' does not start with 'edu-'"
+else
+
+  # Get current pkgver and pkgrel
+  old_pkgver=$(grep -E '^pkgver=' "$PKGBUILD" | cut -d= -f2)
+  old_pkgrel=$(grep -E '^pkgrel=' "$PKGBUILD" | cut -d= -f2)
+
+  # New version: YY.MM
+  new_pkgver=$(date +%y.%m)
+
+  # Set new pkgrel
+  if [[ "$new_pkgver" != "$old_pkgver" ]]; then
+      new_pkgrel="01"
+  else
+      new_pkgrel=$(printf '%02d' $((10#$old_pkgrel + 1)))
+  fi
+
+  # Apply changes
+  sed -i "s/^pkgver=.*/pkgver=$new_pkgver/" "$PKGBUILD"
+  sed -i "s/^pkgrel=.*/pkgrel=$new_pkgrel/" "$PKGBUILD"
+
+  echo "Updated '$pkgname':"
+  echo "  pkgver: $old_pkgver → $new_pkgver"
+  echo "  pkgrel: $old_pkgrel → $new_pkgrel"
+
+fi
+
 destination1=$HOME"/DATA/EDU/nemesis_repo/x86_64/"
 
 destiny=$destination1
@@ -216,3 +253,6 @@ if [ $buildneeded = "true" ]; then
   cp $pwdpath/.current-version $pwdpath/.previous-version
 
 fi
+
+cd /home/erik/DATA/EDU/nemesis_repo/
+sh ./up.sh

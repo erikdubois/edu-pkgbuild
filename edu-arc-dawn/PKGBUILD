@@ -1,28 +1,25 @@
 # Maintainer: Erik Dubois <erik.dubois@gmail.com>
-pkgname=edu-variety-config-git
-_pkgname=edu-variety-config
-_destname1="/etc/skel/.config/variety/"
-_licensedir="/usr/share/arcolinux/licenses/"
+pkgname=edu-arc-dawn-git
+_pkgname=edu-arc-dawn
+_destname1="/usr/share/themes/"
+_licensedir="/usr/share/edu/licenses/"
 pkgver=25.04
-pkgrel=04
-pkgdesc="variety config for edu"
+pkgrel=03
+pkgdesc="Arc themes created for edu"
 arch=('any')
-url="https://github.com/erikdubois//$pkgname"
+url="https://github.com/erikdubois/edu-arc-dawn"
 license=('GPL3')
 makedepends=('git')
-depends=('bash')
-replaces=('arcolinux-variety-git')
+depends=()
+replaces=()
 provides=("${pkgname}")
 options=(!strip !emptydirs)
 source=(${_pkgname}::"git+https://github.com/erikdubois/${_pkgname}.git")
 sha256sums=('SKIP')
-install='readme.install'
 package() {
 	install -dm755 ${pkgdir}${_licensedir}${_pkgname}
 	install -m644  ${srcdir}/${_pkgname}/LICENSE ${pkgdir}${_licensedir}${_pkgname}
 
 	install -dm755 ${pkgdir}${_destname1}
 	cp -r  ${srcdir}/${_pkgname}${_destname1}* ${pkgdir}${_destname1}
-	cp -r  ${srcdir}/${_pkgname}${_destname1}.firstrun ${pkgdir}${_destname1}
-	cp -r  ${srcdir}/${_pkgname}${_destname1}.last_change_time ${pkgdir}${_destname1}
 }

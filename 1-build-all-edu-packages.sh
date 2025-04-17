@@ -32,7 +32,7 @@ echo "################################################################"
 tput sgr0
 echo
 
-for name in $(ls -d */ | cut -f1 -d'/'); do
+for name in $(ls -d edu*/ | cut -f1 -d'/'); do
     count=$((count + 1))
     cd "$name" || { echo "Failed to enter directory $name"; continue; }
     tput setaf 3
@@ -40,8 +40,6 @@ for name in $(ls -d */ | cut -f1 -d'/'); do
     tput sgr0
     echo "#############################################################################################"
     
-    git pull
-
     if [ $? -eq 0 ]; then
         sleep 2
         # Check if build script exists before running
@@ -51,12 +49,6 @@ for name in $(ls -d */ | cut -f1 -d'/'); do
             echo "No build script found for $name"
             echo "Error: The project $name has no build script" | tee -a /tmp/failed
         fi
-    else
-        sleep 2
-        tput setaf 1
-        echo "Git pull failed for $name"
-        echo "Error: Git pull failed for $name" | tee -a /tmp/failed
-        tput sgr0
     fi
     
     cd ..
