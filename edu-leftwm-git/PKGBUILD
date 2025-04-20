@@ -1,25 +1,35 @@
 # Maintainer: Erik Dubois <erik.dubois@gmail.com>
-pkgname=edu-arc-dawn-git
-_pkgname=edu-arc-dawn
-_destname1="/usr/share/themes/"
+pkgname=edu-leftwm-git
+_pkgname=edu-leftwm
+_destname1="/etc/skel/.config/"
+_destname2="/etc/skel/.bin/"
 _licensedir="/usr/share/edu/licenses/"
 pkgver=25.04
-pkgrel=06
-pkgdesc="Arc themes created for edu"
+pkgrel=04
+pkgdesc="Desktop configuration for Leftwm"
 arch=('any')
-url="https://github.com/erikdubois/edu-arc-dawn"
+url="https://github.com/erikdubois/edu-leftwm"
 license=('GPL3')
+conflicts=('edu-leftwm-git')
 makedepends=('git')
 depends=()
-replaces=()
+optdepends=('ttf-sourcecodepro-nerd'
+'ttf-iosevka-nerd' 
+'ttf-material-design-iconic-font'
+'ttf-meslo-nerd-font-powerlevel10k'
+)
 provides=("${pkgname}")
 options=(!strip !emptydirs)
 source=(${_pkgname}::"git+https://github.com/erikdubois/${_pkgname}.git")
 sha256sums=('SKIP')
+install='readme.install'
 package() {
 	install -dm755 ${pkgdir}${_licensedir}${_pkgname}
 	install -m644  ${srcdir}/${_pkgname}/LICENSE ${pkgdir}${_licensedir}${_pkgname}
 
 	install -dm755 ${pkgdir}${_destname1}
 	cp -r  ${srcdir}/${_pkgname}${_destname1}* ${pkgdir}${_destname1}
+
+	install -dm755 ${pkgdir}${_destname2}
+	cp -r  ${srcdir}/${_pkgname}${_destname2}* ${pkgdir}${_destname2}
 }

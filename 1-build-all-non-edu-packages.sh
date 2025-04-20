@@ -21,8 +21,6 @@
 #
 ##################################################################################################################
 
-count=0
-total_repos=$(ls -d */ | wc -l)
 
 echo
 tput setaf 12
@@ -32,7 +30,10 @@ echo "################################################################"
 tput sgr0
 echo
 
-for name in $(ls -d edu*/ | cut -f1 -d'/'); do
+count=0
+total_repos=$(find . -maxdepth 1 -type d ! -name 'edu-*' ! -name '.' | wc -l)
+
+for name in $(find . -maxdepth 1 -type d ! -name 'edu-*' ! -name '.'); do
     count=$((count + 1))
     cd "$name" || { echo "Failed to enter directory $name"; continue; }
     tput setaf 3
@@ -54,3 +55,5 @@ for name in $(ls -d edu*/ | cut -f1 -d'/'); do
     cd ..
 done
 
+cd /home/erik/DATA/EDU/nemesis_repo/
+sh ./up.sh

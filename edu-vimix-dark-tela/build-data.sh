@@ -24,6 +24,11 @@
 #tput setaf 7 = gray 
 #tput setaf 8 = light blue
 
+if [ -d ".git" ]; then
+  echo "Updating with git pull..."
+   git pull
+fi
+
 PKGBUILD="PKGBUILD"
 
 # Ensure PKGBUILD exists
@@ -32,9 +37,9 @@ PKGBUILD="PKGBUILD"
 # Read pkgname
 pkgname=$(grep -E '^pkgname=' "$PKGBUILD" | cut -d= -f2)
 
-# Only proceed if pkgname starts with 'edu-'
+# Only proceed if pkgname does not start with 'edu-'
 if [[ "$pkgname" != edu-* ]]; then
-    echo "Skipping: pkgname '$pkgname' does not start with 'edu-'"
+    echo "Skipping: pkgname '$pkgname' does starts with 'edu-'"
 else
 
   # Get current pkgver and pkgrel
@@ -253,6 +258,3 @@ if [ $buildneeded = "true" ]; then
   cp $pwdpath/.current-version $pwdpath/.previous-version
 
 fi
-
-cd /home/erik/DATA/EDU/nemesis_repo/
-sh ./up.sh

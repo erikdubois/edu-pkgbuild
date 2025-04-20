@@ -1,21 +1,22 @@
 # Maintainer: Erik Dubois <erik.dubois@gmail.com>
-pkgname=edu-arc-dawn-git
-_pkgname=edu-arc-dawn
-_destname1="/usr/share/themes/"
+pkgname=edu-i3-git
+_pkgname=edu-i3
+_destname1="/etc/"
 _licensedir="/usr/share/edu/licenses/"
 pkgver=25.04
-pkgrel=06
-pkgdesc="Arc themes created for edu"
+pkgrel=05
+pkgdesc="Desktop configuration for edu"
 arch=('any')
-url="https://github.com/erikdubois/edu-arc-dawn"
+url="https://github.com/erikdubois/edu-i3"
 license=('GPL3')
-makedepends=('git')
+makedepends=()
+conflicts=()
 depends=()
-replaces=()
 provides=("${pkgname}")
 options=(!strip !emptydirs)
 source=(${_pkgname}::"git+https://github.com/erikdubois/${_pkgname}.git")
 sha256sums=('SKIP')
+install='readme.install'
 package() {
 	install -dm755 ${pkgdir}${_licensedir}${_pkgname}
 	install -m644  ${srcdir}/${_pkgname}/LICENSE ${pkgdir}${_licensedir}${_pkgname}
