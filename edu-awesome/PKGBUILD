@@ -1,0 +1,26 @@
+# Maintainer: Erik Dubois <erik.dubois@gmail.com>
+pkgname=edu-awesome-git
+_pkgname=edu-awesome
+_destname="/etc/skel/.config/awesome/"
+_licensedir="/usr/share/edu/licenses/"
+pkgver=25.04
+pkgrel=02
+pkgdesc="Desktop configuration for Edu"
+arch=('any')
+url="https://github.com/erikdubois/edu-awesome"
+license=('GPL3')
+makedepends=()
+conflicts=()
+depends=()
+provides=("${pkgname}")
+options=(!strip !emptydirs)
+source=(${_pkgname}::"git+https://github.com/erikdubois/${_pkgname}.git")
+sha256sums=('SKIP')
+install='readme.install'
+package() {
+	install -dm755 ${pkgdir}${_licensedir}${_pkgname}
+	install -m644  ${srcdir}/${_pkgname}/LICENSE ${pkgdir}${_licensedir}${_pkgname}
+
+	install -dm755 ${pkgdir}${_destname}
+	cp -r  ${srcdir}/${_pkgname}${_destname}* ${pkgdir}${_destname}
+}
