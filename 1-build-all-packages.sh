@@ -21,7 +21,6 @@
 #
 ##################################################################################################################
 
-
 echo
 tput setaf 12
 echo "################################################################"
@@ -31,9 +30,9 @@ tput sgr0
 echo
 
 count=0
-total_repos=$(find . -maxdepth 1 -type d ! -name 'edu-*' ! -name '.' | wc -l)
+total_repos=$(ls -d */ | wc -l)
 
-for name in $(find . -maxdepth 1 -type d ! -name 'edu-*' ! -name '.'); do
+for name in $(ls -d */ | cut -f1 -d'/'); do
     count=$((count + 1))
     cd "$name" || { echo "Failed to enter directory $name"; continue; }
     tput setaf 3

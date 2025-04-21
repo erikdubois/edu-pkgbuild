@@ -2,7 +2,7 @@
 pkgname=edu-neo-candy-arc-mint-grey-git
 _pkgname=edu-neo-candy-arc-mint-grey
 pkgver=25.04
-pkgrel=06
+pkgrel=08
 _destname1="/usr/share/icons/"
 pkgdesc="Beautyline icons completed for ArcoLinux + Candy icons + mint icons"
 arch=('any')

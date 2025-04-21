@@ -2,7 +2,7 @@
 pkgname=edu-neo-candy-tela-git
 _pkgname=edu-neo-candy-tela
 pkgver=25.04
-pkgrel=10
+pkgrel=12
 _destname1="/usr/share/icons/"
 pkgdesc="Beautyline icons completed for ArcoLinux + Candy icons + Tela"
 arch=('any')

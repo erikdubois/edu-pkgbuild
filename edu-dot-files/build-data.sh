@@ -37,34 +37,27 @@ PKGBUILD="PKGBUILD"
 # Read pkgname
 pkgname=$(grep -E '^pkgname=' "$PKGBUILD" | cut -d= -f2)
 
-# Only proceed if pkgname does not start with 'edu-'
-if [[ "$pkgname" != edu-* ]]; then
-    echo "Skipping: pkgname '$pkgname' does starts with 'edu-'"
+# Get current pkgver and pkgrel
+old_pkgver=$(grep -E '^pkgver=' "$PKGBUILD" | cut -d= -f2)
+old_pkgrel=$(grep -E '^pkgrel=' "$PKGBUILD" | cut -d= -f2)
+
+# New version: YY.MM
+new_pkgver=$(date +%y.%m)
+
+# Set new pkgrel
+if [[ "$new_pkgver" != "$old_pkgver" ]]; then
+    new_pkgrel="01"
 else
-
-  # Get current pkgver and pkgrel
-  old_pkgver=$(grep -E '^pkgver=' "$PKGBUILD" | cut -d= -f2)
-  old_pkgrel=$(grep -E '^pkgrel=' "$PKGBUILD" | cut -d= -f2)
-
-  # New version: YY.MM
-  new_pkgver=$(date +%y.%m)
-
-  # Set new pkgrel
-  if [[ "$new_pkgver" != "$old_pkgver" ]]; then
-      new_pkgrel="01"
-  else
-      new_pkgrel=$(printf '%02d' $((10#$old_pkgrel + 1)))
-  fi
-
-  # Apply changes
-  sed -i "s/^pkgver=.*/pkgver=$new_pkgver/" "$PKGBUILD"
-  sed -i "s/^pkgrel=.*/pkgrel=$new_pkgrel/" "$PKGBUILD"
-
-  echo "Updated '$pkgname':"
-  echo "  pkgver: $old_pkgver → $new_pkgver"
-  echo "  pkgrel: $old_pkgrel → $new_pkgrel"
-
+    new_pkgrel=$(printf '%02d' $((10#$old_pkgrel + 1)))
 fi
+
+# Apply changes
+sed -i "s/^pkgver=.*/pkgver=$new_pkgver/" "$PKGBUILD"
+sed -i "s/^pkgrel=.*/pkgrel=$new_pkgrel/" "$PKGBUILD"
+
+echo "Updated '$pkgname':"
+echo "  pkgver: $old_pkgver → $new_pkgver"
+echo "  pkgrel: $old_pkgrel → $new_pkgrel"
 
 destination1=$HOME"/DATA/EDU/nemesis_repo/x86_64/"
 
