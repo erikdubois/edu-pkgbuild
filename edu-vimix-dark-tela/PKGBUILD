@@ -1,8 +1,8 @@
 # Maintainer: Erik Dubois <erik.dubois@gmail.com>
 pkgname=edu-vimix-dark-tela-git
 _pkgname=edu-vimix-dark-tela
-pkgver=25.04
-pkgrel=06
+pkgver=25.06
+pkgrel=01
 _destname1="/usr/share/icons/"
 pkgdesc="Vimix dark icons with Tela folders"
 arch=('any')

@@ -9,8 +9,9 @@ _destname_icons="/usr/share/icons/hicolor/scalable/apps/"
 _destnamesystem="/etc/systemd/system/"
 _destnamelists="/etc/hblock"
 _licensedir="/usr/share/licenses/"
-pkgver=25.04
-pkgrel=03
+pkgver=25.06
+_pkgver=3.5.1
+pkgrel=02
 pkgdesc="An adblocker that creates a hosts file from automatically downloaded blacklists from Héctor Molinero Fernández"
 arch=('any')
 url="https://github.com/hectorm/hblock"
@@ -22,7 +23,7 @@ depends=('curl')
 provides=("${pkgname}")
 conflicts=('hblock' 'arcolinux-hblock-dev-git')
 options=(!strip !emptydirs)
-source=("https://github.com/hectorm/hblock/archive/v${pkgver}.tar.gz"
+source=("https://github.com/hectorm/hblock/archive/v${_pkgver}.tar.gz"
 		"advert-block.desktop"
 		"edu-advert-block.svg")
 sha256sums=('af98a6753e5de1406b63cd1fabf4b3eae84816168c532dae40c83092acb69941'
@@ -30,15 +31,15 @@ sha256sums=('af98a6753e5de1406b63cd1fabf4b3eae84816168c532dae40c83092acb69941'
             '2f011d0563c868c364a6efa1c5c5f2e9ffbfe82a0dc605a0c726d3ad14ca669d')
 install='readme.install'
 build() {
-	cd "$_pkgname-$pkgver"
+	cd "$_pkgname-$_pkgver"
 	make
 }
 
 package() {
 	install -d -m755 "${pkgdir}${_licensedir}${_pkgname}"
 	install -d -m755 "${pkgdir}${_destname}"
-	install -m644 "${srcdir}/${_pkgname}-${pkgver}/"LICENSE.md "${pkgdir}${_licensedir}${_pkgname}/LICENSE"
-	install -m755 "${srcdir}/${_pkgname}-${pkgver}/"hblock "${pkgdir}${_destname}hblock"
+	install -m644 "${srcdir}/${_pkgname}-${_pkgver}/"LICENSE.md "${pkgdir}${_licensedir}${_pkgname}/LICENSE"
+	install -m755 "${srcdir}/${_pkgname}-${_pkgver}/"hblock "${pkgdir}${_destname}hblock"
 	chown root:root ${pkgdir}${_destname}hblock
 	install -d -m755 "${pkgdir}${_destnamesystem}"
 	#install -m644 "${srcdir}/${_pkgname}-${pkgver}/"resources/systemd/hblock.service "${pkgdir}${_destnamesystem}"

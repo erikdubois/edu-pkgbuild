@@ -173,7 +173,7 @@ if [ $buildneeded = "true" ]; then
     tput sgr0
 
     CHROOT=$HOME/Documents/chroot-archlinux
-    arch-nspawn $CHROOT/root pacman -Syu
+    arch-nspawn $CHROOT/root pacman -Syu --noconfirm
     makechrootpkg -c -r $CHROOT
     if [ $? -eq 0 ]; then
       success="true"

@@ -1,8 +1,8 @@
 # Maintainer: Erik Dubois <erik.dubois@gmail.com>
 pkgname=edu-neo-candy-arc-mint-red-git
 _pkgname=edu-neo-candy-arc-mint-red
-pkgver=25.04
-pkgrel=11
+pkgver=25.06
+pkgrel=01
 _destname1="/usr/share/icons/"
 pkgdesc="Beautyline icons completed for ArcoLinux + Candy icons + Mint icons"
 arch=('any')

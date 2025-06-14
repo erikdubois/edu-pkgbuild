@@ -2,8 +2,8 @@
 
 pkgname=edu-dot-files-git
 _pkgname=edu-dot-files
-pkgver=25.04
-pkgrel=13
+pkgver=25.06
+pkgrel=02
 pkgdesc="System-wide and user dotfiles (by Erik Dubois)"
 arch=('any')
 url="https://github.com/erikdubois/edu-dot-files"

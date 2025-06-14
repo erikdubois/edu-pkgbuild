@@ -1,0 +1,28 @@
+# Maintainer: Erik Dubois <erik.dubois@gmail.com>
+pkgname=archlinux-tweak-tool-git
+_pkgname=archlinux-tweak-tool
+_destname1="/usr"
+_licensedir="/usr/share/arcolinux/licenses/"
+pkgver=25.06
+pkgrel=05
+pkgdesc="Arch Linux Tweak Tool or ATT"
+arch=('x86_64')
+url="https://github.com/erikdubois/${_pkgname}"
+license=('GPL3')
+depends=('xorg-xauth' 'python-gobject' 'polkit-gnome' 'python-distro' 'python-numpy' 'python-psutil')
+optdepends=('alacritty' 'alacritty-themes' 'reflector' 'neofetch' 'chaotic-mirrorlist' 'chaotic-keyring')
+makedepends=('git')
+options=(!strip !emptydirs)
+replaces=(arcolinux-tweak-tool-git)
+conflicts=('arcolinux-tweak-tool-git' 'arcolinux-tweak-tool-dev-git' 'archlinux-tweak-tool-dev-git')
+source=("${_pkgname}::git+${url}")
+sha256sums=('SKIP')
+install='readme.install'
+package() {
+	install -dm755 ${pkgdir}${_licensedir}${_pkgname}
+	install -m644  ${srcdir}/${_pkgname}/LICENSE ${pkgdir}${_licensedir}${_pkgname}
+	sed -i -e s/pkgversion/$pkgver/ $srcdir/${_pkgname}/usr/share/archlinux-tweak-tool/archlinux-tweak-tool.py
+	sed -i -e s/pkgrelease/$pkgrel/ $srcdir/${_pkgname}/usr/share/archlinux-tweak-tool/archlinux-tweak-tool.py
+
+	cp -r ${srcdir}/${_pkgname}/${_destname1} ${pkgdir}
+}

@@ -1,0 +1,26 @@
+# Maintainer: Erik Dubois <erik.dubois@gmail.com>
+pkgname=edu-polybar-git
+_pkgname=edu-polybar
+_destname1="/etc/skel/.config/"
+_licensedir="/usr/share/edu/licenses/"
+pkgver=25.06
+pkgrel=01
+pkgdesc="Polybar configuration for edu"
+arch=('any')
+url="https://github.com/erikdubois/edu-polybars"
+license=('GPL3')
+makedepends=()
+conflicts=()
+depends=()
+provides=("${pkgname}")
+options=(!strip !emptydirs)
+source=(${_pkgname}::"git+https://github.com/erikdubois/${_pkgname}.git")
+sha256sums=('SKIP')
+install='readme.install'
+package() {
+	install -dm755 ${pkgdir}${_licensedir}${_pkgname}
+	install -m644  ${srcdir}/${_pkgname}/LICENSE ${pkgdir}${_licensedir}${_pkgname}
+
+	install -dm755 ${pkgdir}${_destname1}
+	cp -r  ${srcdir}/${_pkgname}${_destname1}* ${pkgdir}${_destname1}
+}
