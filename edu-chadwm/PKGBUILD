@@ -8,7 +8,7 @@ _destname2="/etc/skel/.bin/"
 _destname5="/usr/"
 _licensedir="/usr/share/edu/licenses/"
 pkgver=25.06
-pkgrel=05
+pkgrel=08
 pkgdesc="Configuration files for edu Iso"
 arch=('any')
 url="https://github.com/erikdubois/edu-chadwm"
@@ -26,7 +26,7 @@ depends=('xorg-server'
 			 'imlib2'
 			 'slock'
 			 'imlib2'
-			 'eww'
+			 'gtk3'
 			 'dash'
 			 'ttf-jetbrains-mono-nerd')
 conflicts=(arcolinux-chadwm-git)
