@@ -3,7 +3,7 @@
 pkgname=edu-dot-files-git
 _pkgname=edu-dot-files
 pkgver=25.06
-pkgrel=04
+pkgrel=09
 pkgdesc="System-wide and user dotfiles (by Erik Dubois)"
 arch=('any')
 url="https://github.com/erikdubois/edu-dot-files"
