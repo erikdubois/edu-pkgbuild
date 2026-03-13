@@ -1,6 +1,6 @@
 # Maintainer: Erik Dubois <erik.dubois@gmail.com>
 pkgname=edu-surfn-numixs-blue-git
-pkgver=25.06
+pkgver=25.10
 pkgrel=01
 _destname="/usr/share/icons/"
 pkgdesc="Surfn is a colourful icon theme."
