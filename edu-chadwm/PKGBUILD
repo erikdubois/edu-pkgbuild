@@ -7,29 +7,43 @@ _destname2="/etc/skel/.bin/"
 #_destname4="/usr/share/man/man1/"
 _destname5="/usr/"
 _licensedir="/usr/share/edu/licenses/"
-pkgver=25.12
-pkgrel=03
-pkgdesc="Configuration files for edu Iso"
+pkgver=26.04
+pkgrel=05
+pkgdesc="Configuration files"
 arch=('any')
 url="https://github.com/erikdubois/edu-chadwm"
 license=('GPL3')
-makedepends=('git')
-depends=('xorg-server'
-			 'xorg-xsetroot'
-			 'feh'
-			 'wget'
-			 'edu-rofi-git'
-			 'edu-rofi-themes-git'
-			 'acpi'
-			 'maim'
-			 'xclip'
-			 'imlib2'
-			 'slock'
-			 'imlib2'
-			 'gtk3'
-			 'dash'
-			 'ttf-jetbrains-mono-nerd')
-conflicts=(arcolinux-chadwm-git)
+makedepends=(
+	'imlib2'
+	'make'
+	'gcc'
+)
+depends=(
+	'acpi'
+	'alacritty'
+	'btop'
+	'dmenu'
+	'edu-rofi-git'
+	'edu-rofi-themes-git'
+	'feh'
+	'gcc'
+	'git'
+	'imlib2'
+	'maim'
+	'make'
+	'rofi'
+	'slock'
+	'sxhkd'
+	'ttf-jetbrains-mono-nerd'
+	'wget'
+	'xclip'
+	'xorg-server'
+	'xorg-xsetroot'
+)
+
+optdepends=(
+  'fastcompmgr-git: compositor for transparency and effects'
+)
 provides=("${pkgname}")
 options=(!strip !emptydirs)
 source=(${_pkgname}::"git+https://github.com/erikdubois/edu-${_pkgname}.git")

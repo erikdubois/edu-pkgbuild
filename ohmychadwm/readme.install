@@ -1,0 +1,87 @@
+post_install() {
+    USER_NAME="${SUDO_USER:-$USER}"
+    USER_HOME="$(getent passwd "$USER_NAME" | cut -d: -f6)"
+
+    SKEL_DIR="/etc/skel/.config/ohmychadwm"
+    USER_CONFIG_DIR="$USER_HOME/.config/ohmychadwm"
+    CHADWM_DIR="$SKEL_DIR/chadwm"
+    SLSTATUS_DIR="$SKEL_DIR/slstatus"
+
+    # Check if source config exists
+    if [ ! -d "$SKEL_DIR" ]; then
+        echo "WARNING: $SKEL_DIR does not exist. Skipping ohmychadwm setup."
+        return 0
+    fi
+
+    # Copy config to user home if missing
+    if [ -n "$USER_HOME" ] && [ ! -d "$USER_CONFIG_DIR" ]; then
+        echo "Copying ohmychadwm config to user home..."
+        mkdir -p "$USER_HOME/.config"
+        cp -r "$SKEL_DIR" "$USER_HOME/.config/"
+        chown -R "$USER_NAME":"$USER_NAME" "$USER_CONFIG_DIR"
+    else
+        echo "ohmychadwm config already exists, skipping..."
+    fi
+
+    # Build and install chadwm if not already installed
+    if ! command -v chadwm >/dev/null 2>&1; then
+        echo "chadwm not found. Building and installing chadwm..."
+
+        if [ -d "$CHADWM_DIR" ]; then
+            cd "$CHADWM_DIR" || return 1
+
+            if [ -f Makefile ]; then
+                echo "Running make clean for chadwm..."
+                make clean 2>/dev/null || true
+
+                echo "Running make for chadwm..."
+                make -B || return 1
+
+                echo "Running make install for chadwm..."
+                make install || return 1
+
+                echo "Running final make clean for chadwm..."
+                make clean 2>/dev/null || true
+            else
+                echo "WARNING: No Makefile found in $CHADWM_DIR"
+            fi
+        else
+            echo "WARNING: chadwm build folder not found: $CHADWM_DIR"
+        fi
+    else
+        echo "chadwm already installed, skipping..."
+    fi
+
+    # Build and install slstatus if not already installed
+    if ! command -v slstatus >/dev/null 2>&1; then
+        echo "slstatus not found. Building and installing slstatus..."
+
+        if [ -d "$SLSTATUS_DIR" ]; then
+            cd "$SLSTATUS_DIR" || return 1
+
+            if [ -f Makefile ]; then
+                echo "Running make clean for slstatus..."
+                make clean 2>/dev/null || true
+
+                echo "Running make for slstatus..."
+                make -B || return 1
+
+                echo "Running make install for slstatus..."
+                make install || return 1
+
+                echo "Running final make clean for slstatus..."
+                make clean 2>/dev/null || true
+            else
+                echo "WARNING: No Makefile found in $SLSTATUS_DIR"
+            fi
+        else
+            echo "WARNING: slstatus build folder not found: $SLSTATUS_DIR"
+        fi
+    else
+        echo "slstatus already installed, skipping..."
+    fi
+}
+
+post_upgrade() {
+    post_install
+}

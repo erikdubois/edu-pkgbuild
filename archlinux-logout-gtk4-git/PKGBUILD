@@ -1,0 +1,36 @@
+# Maintainer: Erik Dubois <erik.dubois@gmail.com>
+pkgname=archlinux-logout-gtk4-git
+_pkgname=archlinux-logout-gtk4
+_destname1="/usr"
+_destname2="/etc"
+_licensedir="/usr/share/arcolinux/licenses/"
+pkgver=26.04
+pkgrel=32
+pkgdesc="Arch Linux logout"
+arch=('any')
+url="https://github.com/erikdubois/${_pkgname}"
+license=('GPL3')
+depends=(
+	'betterlockscreen'
+	'gtk4'
+	'librsvg'
+	'python-cairo'
+	'python-distro'
+	'python-gobject'
+	'python-psutil'
+	'xdotool'
+)
+makedepends=('git')
+options=(!strip !emptydirs)
+install='readme.install'
+conflicts=(archlinux-logout-git arcolinux-logout-git arcolinux-logout-dev-git arcolinux-betterlockscreen-git arcolinux-betterlockscreen-dev-git archlinux-logout-dev-git)
+replaces=(archlinux-logout-themes-git arcolinux-logout-themes-git arcolinux-logout-git arcolinux-betterlockscreen-git)
+source=($_pkgname-${pkgver}-${pkgrel}::git+$url)
+sha256sums=('SKIP')
+package() {
+	install -dm755 ${pkgdir}${_licensedir}${_pkgname}
+	install -m644  ${srcdir}/${_pkgname}-${pkgver}-${pkgrel}/LICENSE ${pkgdir}${_licensedir}${_pkgname}
+
+	cp -r ${srcdir}/${_pkgname}-${pkgver}-${pkgrel}/${_destname1} ${pkgdir}
+	cp -r ${srcdir}/${_pkgname}-${pkgver}-${pkgrel}/${_destname2} ${pkgdir}
+}

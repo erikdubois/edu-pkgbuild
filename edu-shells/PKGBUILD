@@ -2,8 +2,8 @@
 pkgname=edu-shells-git
 _pkgname=edu-shells
 _destname1="/etc/skel/"
-pkgver=25.10
-pkgrel=02
+pkgver=26.04
+pkgrel=05
 pkgdesc="configs for bash, zsh and fish"
 arch=('any')
 url="https://github.com/erikdubois/edu-shells"

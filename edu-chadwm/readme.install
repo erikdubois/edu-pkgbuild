@@ -1,22 +1,46 @@
 post_install() {
+    USER_NAME="${SUDO_USER:-$USER}"
+    USER_HOME=$(getent passwd "$USER_NAME" | cut -d: -f6)
 
-    if [ -d /etc/skel/.config/arco-chadwm/chadwm ]; then
-        cd /etc/skel/.config/arco-chadwm/chadwm
-    else
-        echo "Error: Directory /etc/skel/.config/arco-chadwm/chadwm not found!"
-        return 1
+    SKEL_DIR="/etc/skel/.config/arco-chadwm"
+    USER_CONFIG_DIR="$USER_HOME/.config/arco-chadwm"
+    BUILD_DIR="$SKEL_DIR/chadwm"
+
+    # --- Check if skel config exists ---
+    if [ ! -d "$SKEL_DIR" ]; then
+        echo "WARNING: $SKEL_DIR does not exist. Skipping chadwm setup."
+        return 0
     fi
+
+    # --- Copy config to user ---
+    if [ -n "$USER_HOME" ] && [ ! -d "$USER_CONFIG_DIR" ]; then
+        echo "Copying arco-chadwm config to user home..."
+        cp -r "$SKEL_DIR" "$USER_HOME/.config/"
+        chown -R "$USER_NAME":"$USER_NAME" "$USER_CONFIG_DIR"
+    else
+        echo "arco-chadwm config already exists, skipping..."
+    fi
+
+    # --- Build chadwm ---
     if [ ! -f /usr/local/bin/chadwm ]; then
-        echo -e "\n** Making ArcoLinux Chadwm **\n"
-        make -B
-        echo -e "\n** Installing ArcoLinux Chadwm **\n"
-        make install
-        echo
-        echo -e "\n** The files have been installed in /etc/skel/.config/arco-chadwm **\n"
-        echo
-        echo "Chadwm like Dwm and Dusk need to be build from your config"
-        echo
-    fi 
+        if [ -d "$BUILD_DIR" ]; then
+            echo -e "\n** Building ArcoLinux Chadwm **\n"
+            cd "$BUILD_DIR" || return 1
+
+            # Clean first (ignore errors if nothing to clean)
+            make clean 2>/dev/null || true
+
+            # Force rebuild
+            make -B
+
+            echo -e "\n** Installing ArcoLinux Chadwm **\n"
+            make install
+
+            echo -e "\n** Installed from $BUILD_DIR **\n"
+        else
+            echo "WARNING: Chadwm source directory missing in $BUILD_DIR"
+        fi
+    fi
 }
 
 post_upgrade() {
