@@ -1,7 +1,7 @@
 # Maintainer: Erik Dubois <erik.dubois@gmail.com>
 pkgname=edu-papirus-dark-tela-git
 _pkgname=edu-papirus-dark-tela
-pkgver=26.03
+pkgver=26.04
 pkgrel=01
 _destname1="/usr/share/icons/"
 pkgdesc="Papirus dark icons with Tela folders"

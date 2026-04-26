@@ -1,26 +1,28 @@
 post_install() {
   echo
   tput setaf 2
-  echo "We will change your theme automatically to arcolinux-simplicity"
+  echo "We will change your theme automatically to edu-simplicity"
   echo "The current theme will be changed in these files when available:"
   echo "- /etc/sddm.conf.d/kde_settings.conf"
   echo "- /etc/sddm.conf"
   echo "- /usr/lib/sddm/sddm.conf.d/default.conf"
+  echo "The first existing file will be used"
+  echo "and then the process will halt"
   tput sgr0
   
   if [ -f /etc/sddm.conf.d/kde_settings.conf ]; then
     if grep -q Current= /etc/sddm.conf.d/kde_settings.conf ; then
-        sed -i '/Current=/c Current=arcolinux-simplicity' /etc/sddm.conf.d/kde_settings.conf
+        sed -i '/Current=/c Current=edu-simplicity' /etc/sddm.conf.d/kde_settings.conf
     fi
   fi
   if [ -f /etc/sddm.conf ]; then
     if grep -q Current= /etc/sddm.conf ; then
-      sed -i '/Current=/c Current=arcolinux-simplicity' /etc/sddm.conf
+      sed -i '/Current=/c Current=edu-simplicity' /etc/sddm.conf
     fi
   fi
   if [ -f /usr/lib/sddm/sddm.conf.d/default.conf ]; then
     if grep -q Current= /usr/lib/sddm/sddm.conf.d/default.conf ; then
-      sed -i '/Current=/c Current=arcolinux-simplicity' /usr/lib/sddm/sddm.conf.d/default.conf
+      sed -i '/Current=/c Current=edu-simplicity' /usr/lib/sddm/sddm.conf.d/default.conf
     fi
   fi
   echo
