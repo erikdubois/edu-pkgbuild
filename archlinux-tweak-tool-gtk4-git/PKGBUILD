@@ -2,15 +2,40 @@
 pkgname=archlinux-tweak-tool-gtk4-git
 _pkgname=archlinux-tweak-tool-gtk4
 _destname1="/usr"
-_licensedir="/usr/share/arcolinux/licenses/"
-pkgver=26.04
-pkgrel=99
+_licensedir="/usr/share/kiro/licenses/"
+pkgver=26.05
+pkgrel=04
 pkgdesc="Arch Linux Tweak Tool or ATT"
 arch=('x86_64')
 url="https://github.com/erikdubois/${_pkgname}"
 license=('GPL3')
 depends=('xorg-xauth' 'python-gobject' 'polkit-gnome' 'python-distro' 'python-psutil')
-optdepends=('alacritty' 'alacritty-themes' 'reflector' 'neofetch' 'chaotic-mirrorlist' 'chaotic-keyring')
+optdepends=('alacritty: terminal for install/remove operations'
+            'alacritty-themes: themes for alacritty terminal'
+            'reflector: rank Arch mirrors by speed (Maintenance tab)'
+            'rate-mirrors: alternative mirror ranking tool (Maintenance tab)'
+            'hblock: block ads via hosts file (Maintenance tab)'
+            'fastfetch: system information display (Fastfetch tab)'
+            'chaotic-mirrorlist: Chaotic-AUR mirror list'
+            'chaotic-keyring: Chaotic-AUR keyring'
+            'sddm: login display manager (SDDM tab)'
+            'inxi: system information viewer (System tab)'
+            'hwinfo: hardware information tool (System tab)'
+            'gparted: graphical partition editor (System tab)'
+            'partitionmanager: KDE partition manager (System tab)'
+            'tuned: adaptive system tuning daemon (Performance tab)'
+            'irqbalance: optimize IRQ distribution (Performance tab)'
+            'ananicy-cpp: process priority manager (Performance tab)'
+            'gamemode: gaming performance optimizer (Performance tab)'
+            'fish: friendly interactive shell (Shell tab)'
+            'zsh: Z shell (Shell tab)'
+            'bat: syntax-highlighted cat replacement (Shell extras)'
+            'fzf: fuzzy finder (Shell extras)'
+            'bluez: bluetooth stack (Services tab)'
+            'bluez-utils: bluetooth utilities (Services tab)'
+            'samba: Windows file sharing (Services tab)'
+            'cups: printing system (Services tab)'
+            'pipewire: modern audio system (Services tab)')
 makedepends=('git')
 options=(!strip !emptydirs)
 replaces=(arcolinux-tweak-tool-git)
@@ -21,8 +46,5 @@ install='readme.install'
 package() {
 	install -dm755 "${pkgdir}${_licensedir}${_pkgname}"
 	install -m644 "${srcdir}/${_pkgname}/LICENSE" "${pkgdir}${_licensedir}${_pkgname}/LICENSE"
-	sed -i "s/pkgversion/$pkgver/" "$srcdir/$_pkgname/usr/share/archlinux-tweak-tool/archlinux-tweak-tool.py"
-	sed -i "s/pkgrelease/$pkgrel/" "$srcdir/$_pkgname/usr/share/archlinux-tweak-tool/archlinux-tweak-tool.py"
-
 	cp -r "${srcdir}/${_pkgname}/${_destname1}" "${pkgdir}"
 }

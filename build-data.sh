@@ -59,7 +59,7 @@ echo "Updated '$pkgname':"
 echo "  pkgver: $old_pkgver → $new_pkgver"
 echo "  pkgrel: $old_pkgrel → $new_pkgrel"
 
-destination1=$HOME"/DATA/EDU/nemesis_repo/x86_64/"
+destination1=$HOME"/EDU/nemesis_repo/x86_64/"
 
 destiny=$destination1
 

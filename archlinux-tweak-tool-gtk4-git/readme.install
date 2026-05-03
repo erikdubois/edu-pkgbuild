@@ -15,6 +15,7 @@ post_install() {
     echo -e "** Crystal Linux"
     echo -e "** EndeavourOS"
     echo -e "** Garuda"
+    echo -e "** Kiro"
     echo -e "** Liya"
     echo -e "** LinuxHub Prime"
     echo -e "** Mabox"

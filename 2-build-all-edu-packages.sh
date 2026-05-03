@@ -54,5 +54,5 @@ for name in $(ls -d edu*/ | cut -f1 -d'/'); do
     cd ..
 done
 
-cd /home/erik/DATA/EDU/nemesis_repo/
+cd /home/erik/EDU/nemesis_repo/
 sh ./up.sh
