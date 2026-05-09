@@ -8,7 +8,7 @@ _destname2="/etc/skel/.bin/"
 _destname5="/usr/"
 _licensedir="/usr/share/edu/licenses/"
 pkgver=26.05
-pkgrel=01
+pkgrel=06
 pkgdesc="Configuration files"
 arch=('any')
 url="https://github.com/erikdubois/ohmychadwm"
@@ -35,6 +35,7 @@ depends=(
 	'slock'
 	'sxhkd'
 	'ttf-jetbrains-mono-nerd'
+	'noto-fonts-cjk'
 	'wget'
 	'xclip'
 	'xorg-server'

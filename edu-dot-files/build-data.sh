@@ -24,6 +24,11 @@
 #tput setaf 7 = gray 
 #tput setaf 8 = light blue
 
+if [ -d ".git" ]; then
+  echo "Updating with git pull..."
+   git pull
+fi
+
 PKGBUILD="PKGBUILD"
 
 # Ensure PKGBUILD exists

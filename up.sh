@@ -30,6 +30,9 @@ fi
 # Below command will backup everything inside the project folder
 git add --all .
 
+# skip commit if nothing staged (git commit exits non-zero with nothing to commit)
+git diff --cached --quiet || git commit -m "update"
+
 git commit -m "update"
 
 # Push the local files to github

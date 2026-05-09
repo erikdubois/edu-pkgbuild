@@ -21,6 +21,7 @@ post_install() {
     echo -e "** Mabox"
     echo -e "** Manjaro"
     echo -e "** Nyarch"
+    echo -e "** Omarchy"
     echo -e "** ParchLinux"
     echo -e "** PrismLinux"
     echo -e "** RebornOS"
