@@ -90,17 +90,17 @@ configure_git() {
     project="$(basename "${SCRIPT_DIR}")"
 
     log_section "Configuring git for project: ${project}"
-    log_info "https://github.com/erikdubois/${project}"
+    log_info "https://github.com/kirodubes/${project}"
 
     git config --global pull.rebase false
-    git config --global user.name "Erik Dubois"
-    git config --global user.email "erik.dubois@gmail.com"
+    git config --global user.name "Kiro Dubes"
+    git config --global user.email "kirodubes@gmail.com"
     sudo git config --system core.editor nano
     git config --global push.default simple
 
-    git -C "${SCRIPT_DIR}" remote set-url origin "git@github.com-edu:erikdubois/${project}"
+    git -C "${SCRIPT_DIR}" remote set-url origin "git@github.com-edu:kirodubes/${project}"
 
-    log_success "Git configured — remote set to git@github.com-edu:erikdubois/${project}"
+    log_success "Git configured — remote set to git@github.com-edu:kirodubes/${project}"
 }
 
 ############################################################

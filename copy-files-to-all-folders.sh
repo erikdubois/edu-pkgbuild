@@ -85,24 +85,28 @@ trap 'on_error "$LINENO" "$BASH_COMMAND"' ERR
 #####################################################################
 # Functions
 #####################################################################
+total_dirs=0
+total_copies=0
+
 copy_script() {
     local filename="$1"
     local source="${SCRIPT_DIR}/${filename}"
+    local count=0
 
     if [[ ! -f "${source}" ]]; then
         log_error "${filename} not found in ${SCRIPT_DIR}"
         exit 1
     fi
 
-    log_section "Copying ${filename} to all package dirs that have one"
+    log_section "Copying ${filename} to all subdirectories"
 
     while IFS= read -r -d '' dir; do
-        local dirname
-        dirname="$(basename "${dir}")"
-        [[ -f "${dir}/${filename}" ]] || continue
-        cp "${source}" "${dir}/${filename}"
-        log_info "Copied ${filename} → ${dirname}"
+        cp -v "${source}" "${dir}/${filename}"
+        count=$(( count + 1 ))
     done < <(find "${SCRIPT_DIR}" -mindepth 1 -maxdepth 1 -type d -not -name '.*' -print0 | sort -z)
+
+    total_dirs=$count
+    total_copies=$(( total_copies + count ))
 }
 
 #####################################################################
@@ -110,15 +114,18 @@ copy_script() {
 #####################################################################
 main() {
     local repo_name
-    repo_name="$(basename "${SCRIPT_DIR}")"
+    repo_name="$(basename "${PWD}")"
 
-    if [[ "${repo_name}" == *pkgbuild* ]]; then
+    log_info "Detected repo: ${repo_name}"
+
+    if [[ "${repo_name,,}" == *pkg*build* || "${repo_name,,}" == *pkg-build* ]]; then
         copy_script "build.sh"
     else
         copy_script "setup.sh"
         copy_script "up.sh"
     fi
 
+    log_info "Directories: ${total_dirs} | Files copied: ${total_copies}"
     log_success "$(basename "$0") done"
 }
 
