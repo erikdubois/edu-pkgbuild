@@ -1,0 +1,11 @@
+post_install() {
+    plymouth-set-default-theme startrek
+}
+
+post_upgrade() {
+    plymouth-set-default-theme startrek
+}
+
+pre_remove() {
+    plymouth-set-default-theme details
+}

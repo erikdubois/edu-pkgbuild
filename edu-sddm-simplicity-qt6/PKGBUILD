@@ -1,19 +1,18 @@
 # Maintainer: Erik Dubois <erik.dubois@gmail.com>
-pkgname=edu-sddm-simplicity-git
-_pkgname=edu-sddm-simplicity
+pkgname=edu-sddm-simplicity-qt6-git
+_pkgname=edu-sddm-simplicity-qt6
 _destname1="/usr"
-_destname2="/etc"
 _licensedir="/usr/share/edu/licenses/"
 pkgver=26.05
-pkgrel=08
+pkgrel=11
 pkgdesc="Simplicity theme from isseigx on gitlab"
 arch=('any')
 url="https://github.com/erikdubois/${_pkgname}"
 license=('GPL3')
-depends=('qt5-quickcontrols2' 'qt5-quickcontrols')
+conflicts=('edu-sddm-simplicity-git')
 makedepends=('git')
+depends=('qt6-declarative')
 install=readme.install
-makedepends=('git')
 options=(!strip !emptydirs)
 replaces=()
 source=(${_pkgname}::git+$url)
@@ -22,5 +21,4 @@ package() {
   install -dm755 ${pkgdir}${_licensedir}${_pkgname}
   install -m644  ${srcdir}/${_pkgname}/LICENSE ${pkgdir}${_licensedir}${_pkgname}
   cp -r ${srcdir}/${_pkgname}/${_destname1} ${pkgdir}
-  cp -r ${srcdir}/${_pkgname}/${_destname2} ${pkgdir}
 }
