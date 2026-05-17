@@ -1,58 +1,128 @@
 #!/bin/bash
-#https://wiki.archlinux.org/index.php/DeveloperWiki:Building_in_a_Clean_Chroot
-
-#tput setaf 0 = black
-#tput setaf 1 = red
-#tput setaf 2 = green
-#tput setaf 3 = yellow
-#tput setaf 4 = dark blue
-#tput setaf 5 = purple
-#tput setaf 6 = cyan
-#tput setaf 7 = gray
-#tput setaf 8 = light blue
-##################################################################################################################
-# Written to be used on 64 bits computers
-# Author 	: 	Erik Dubois
-# Website 	: 	http://www.erikdubois.be
-##################################################################################################################
-##################################################################################################################
+set -euo pipefail
+#####################################################################
+# Author    : Erik Dubois
+# Website   : https://www.erikdubois.be
+#####################################################################
 #
 #   DO NOT JUST RUN THIS. EXAMINE AND JUDGE. RUN AT YOUR OWN RISK.
 #
-##################################################################################################################
+#####################################################################
 
-count=0
-total_repos=$(ls -d */ | wc -l)
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 
-echo
-tput setaf 12
-echo "################################################################"
-echo "We are going to build $total_repos packages"
-echo "################################################################"
-tput sgr0
-echo
+#####################################################################
+# Colors
+#####################################################################
+if command -v tput >/dev/null 2>&1 && [[ -t 1 ]]; then
+    RED="$(tput setaf 1)"
+    GREEN="$(tput setaf 2)"
+    YELLOW="$(tput setaf 3)"
+    BLUE="$(tput setaf 4)"
+    CYAN="$(tput setaf 6)"
+    RESET="$(tput sgr0)"
+else
+    RED="" GREEN="" YELLOW="" BLUE="" CYAN="" RESET=""
+fi
 
-for name in $(ls -d edu-neo-candy*/ | cut -f1 -d'/'); do
-    count=$((count + 1))
-    cd "$name" || { echo "Failed to enter directory $name"; continue; }
-    tput setaf 3
-    echo "Github nr : " $count " - git pull of " $name - of total $total_repos
-    tput sgr0
-    echo "#############################################################################################"
-    
-    if [ $? -eq 0 ]; then
-        sleep 2
-        # Check if build script exists before running
-        if compgen -G "./build*" > /dev/null; then
-            sh ./build*
+#####################################################################
+# Logging
+#####################################################################
+log_section() {
+    echo
+    echo "${GREEN}############################################################################${RESET}"
+    echo "$1"
+    echo "${GREEN}############################################################################${RESET}"
+    echo
+}
+
+log_info() {
+    echo
+    echo "${BLUE}############################################################################${RESET}"
+    echo "$1"
+    echo "${BLUE}############################################################################${RESET}"
+    echo
+}
+
+log_warn() {
+    echo
+    echo "${YELLOW}############################################################################${RESET}"
+    echo "$1"
+    echo "${YELLOW}############################################################################${RESET}"
+    echo
+}
+
+log_error() {
+    echo
+    echo "${RED}############################################################################${RESET}"
+    echo "$1"
+    echo "${RED}############################################################################${RESET}"
+    echo
+}
+
+log_success() {
+    echo
+    echo "${GREEN}############################################################################${RESET}"
+    echo "$1"
+    echo "${GREEN}############################################################################${RESET}"
+    echo
+}
+
+#####################################################################
+# Error handling
+#####################################################################
+on_error() {
+    local lineno="$1"
+    local cmd="$2"
+    echo
+    echo "${RED}ERROR on line ${lineno}: ${cmd}${RESET}"
+    echo
+    sleep 10
+}
+
+trap 'on_error "$LINENO" "$BASH_COMMAND"' ERR
+
+#####################################################################
+# Functions
+#####################################################################
+build_edu_themes() {
+    local dirs total count
+
+    mapfile -t dirs < <(find "${SCRIPT_DIR}" -maxdepth 1 -mindepth 1 -type d -name "edu-neo-candy*" | sort)
+    total="${#dirs[@]}"
+    count=0
+
+    log_section "Building ${total} edu-neo-candy themes"
+
+    for dir in "${dirs[@]}"; do
+        count=$((count + 1))
+        local name
+        name="$(basename "${dir}")"
+
+        log_info "Package ${count} of ${total}: ${name}"
+
+        if compgen -G "${dir}/build*" > /dev/null 2>&1; then
+            (cd "${dir}" && sh ./build*)
         else
-            echo "No build script found for $name"
-            echo "Error: The project $name has no build script" | tee -a /tmp/failed
+            log_warn "No build script found for ${name} — skipping"
+            echo "Error: ${name} has no build script" | tee -a /tmp/failed
         fi
-    fi
-    
-    cd ..
-done
+    done
+}
 
-cd /home/erik/EDU/nemesis_repo/
-sh ./up.sh
+publish_repo() {
+    log_section "Publishing nemesis_repo"
+    bash /home/erik/EDU/nemesis_repo/up.sh
+}
+
+#####################################################################
+# Main
+#####################################################################
+main() {
+    build_edu_themes
+    publish_repo
+
+    log_success "$(basename "$0") done"
+}
+
+main "$@"
