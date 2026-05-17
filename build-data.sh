@@ -112,7 +112,9 @@ bump_version() {
     sed -i "s/^pkgver=.*/pkgver=${new_pkgver}/" "${pkgbuild}"
     sed -i "s/^pkgrel=.*/pkgrel=${new_pkgrel}/" "${pkgbuild}"
 
-    log_info "Updated '${pkgname}': pkgver ${old_pkgver} → ${new_pkgver}  pkgrel ${old_pkgrel} → ${new_pkgrel}"
+    log_info "Updated '${pkgname}':
+  pkgver: ${old_pkgver} → ${new_pkgver}
+  pkgrel: ${old_pkgrel} → ${new_pkgrel}"
 }
 
 create_current_version() {
@@ -186,7 +188,7 @@ build_package() {
     if [[ "${CHOICE}" == "1" ]]; then
         log_section "Building ${search} in CHROOT ${CHROOT}"
         arch-nspawn "${CHROOT}/root" pacman -Syu --noconfirm
-        if makechrootpkg -c -r "${CHROOT}"; then
+        if (cd /tmp/tempbuild && makechrootpkg -c -r "${CHROOT}"); then
             success="true"
         fi
     else
