@@ -101,6 +101,11 @@ bump_version() {
     old_pkgver=$(grep -E '^pkgver=' "${pkgbuild}" | cut -d= -f2)
     old_pkgrel=$(grep -E '^pkgrel=' "${pkgbuild}" | cut -d= -f2)
 
+    if [[ ! "${old_pkgver}" =~ ^[0-9]{2}\.[0-9]{2}$ ]]; then
+        log_info "Upstream-versioned package (pkgver=${old_pkgver}) — skipping bump"
+        return 0
+    fi
+
     new_pkgver=$(date +%y.%m)
 
     if [[ "${new_pkgver}" != "${old_pkgver}" ]]; then
