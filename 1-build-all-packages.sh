@@ -88,7 +88,7 @@ trap 'on_error "$LINENO" "$BASH_COMMAND"' ERR
 build_all_packages() {
     local dirs total count
 
-    mapfile -t dirs < <(find "${SCRIPT_DIR}" -maxdepth 1 -mindepth 1 -type d | sort)
+    mapfile -t dirs < <(find "${SCRIPT_DIR}" -maxdepth 1 -mindepth 1 -type d -not -name ".*" | sort)
     total="${#dirs[@]}"
     count=0
 
