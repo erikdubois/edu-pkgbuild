@@ -1,0 +1,534 @@
+#!/bin/bash
+set -Euo pipefail
+##################################################################################################################
+# Author    : Erik Dubois
+# Website   : https://www.erikdubois.be
+##################################################################################################################
+#
+#   DO NOT JUST RUN THIS. EXAMINE AND JUDGE. RUN AT YOUR OWN RISK.
+#
+##################################################################################################################
+
+# shellcheck source=/usr/local/lib/kiro-common.sh
+if [[ -f /usr/local/lib/kiro-common.sh ]]; then
+    source /usr/local/lib/kiro-common.sh
+else
+    echo "ERROR: kiro-common.sh not found" >&2
+    exit 1
+fi
+
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+
+for _arg in "$@"; do
+    case "$_arg" in
+        -h|--help)
+            show_help "$(basename "$0")" \
+                "Verify Kiro system configuration is correctly applied" \
+                "[--help] [--version]" \
+                ""
+            exit 0
+            ;;
+        -v|--version)
+            show_version "$(basename "$0")"
+            exit 0
+            ;;
+    esac
+done
+unset _arg
+
+if [[ $EUID -ne 0 ]]; then
+    echo "Run kiro-verify with root privileges: sudo kiro-verify"
+    trap - ERR
+    exit 1
+fi
+
+##################################################################################################################
+# Counters
+##################################################################################################################
+PASS=0
+FAIL=0
+WARN=0
+SKIP=0
+
+##################################################################################################################
+# Result helpers
+##################################################################################################################
+ok() {
+    echo "${GREEN}  [PASS]${RESET} $1"
+    PASS=$((PASS + 1))
+}
+
+ko() {
+    echo "${RED}  [FAIL]${RESET} $1"
+    FAIL=$((FAIL + 1))
+}
+
+warn_check() {
+    echo "${YELLOW}  [WARN]${RESET} $1"
+    WARN=$((WARN + 1))
+}
+
+skip_check() {
+    echo "${CYAN}  [SKIP]${RESET} $1"
+    SKIP=$((SKIP + 1))
+}
+
+##################################################################################################################
+# Config file presence
+##################################################################################################################
+check_config_files() {
+    log_subsection "Config File Presence"
+
+    local files=(
+        /etc/sysctl.d/99-kiro-optimizations.conf
+        /etc/systemd/system.conf.d/10-kiro-system.conf
+        /etc/systemd/system.conf.d/90-memory-accounting.conf
+        /etc/systemd/journald.conf.d/10-kiro-journal.conf
+        /etc/systemd/coredump.conf.d/10-kiro-coredump.conf
+        /etc/systemd/user.conf.d/10-kiro-user.conf
+        /etc/systemd/zram-generator.conf
+        /etc/systemd/system/pci-latency.service
+        /etc/modprobe.d/blacklist-watchdog.conf
+        /etc/modprobe.d/amdgpu.conf
+        /etc/modprobe.d/audio-hda.conf
+        /etc/modprobe.d/disable-evbug.conf
+        /etc/modprobe.d/intel-ethernet.conf
+        /etc/modprobe.d/nobeep.conf
+        /etc/modprobe.d/nvidia.conf
+        /etc/modprobe.d/realtek-ethernet.conf
+        /etc/modprobe.d/snd_pcsp.conf
+        /etc/security/limits.d/99-audio.conf
+        /etc/security/limits.d/99-kiro.conf
+        /etc/tmpfiles.d/thp-tuning.conf
+        /etc/udev/rules.d/60-io-scheduler.rules
+        /etc/udev/rules.d/60-ioschedulers-tuning.rules
+        /etc/udev/rules.d/61-audio-power.rules
+        /etc/udev/rules.d/62-network-optimization.rules
+        /etc/udev/rules.d/63-usb-optimization.rules
+        /etc/udev/rules.d/64-gpu-optimization.rules
+        /etc/udev/rules.d/65-storage-optimization.rules
+        /etc/udev/rules.d/66-input-optimization.rules
+        /etc/udev/rules.d/67-laptop-optimization.rules
+        /etc/udev/rules.d/68-sound-power.rules
+        /etc/X11/xorg.conf.d/30-touchpad.conf
+        /etc/X11/xorg.conf.d/99-killX.conf
+        /etc/pacman.d/hooks/bootloader-systemd-boot.hook
+        /usr/local/lib/kiro-common.sh
+    )
+
+    for f in "${files[@]}"; do
+        if [[ -f "$f" ]]; then
+            ok "Installed: $f"
+        else
+            ko "Missing:   $f"
+        fi
+    done
+}
+
+##################################################################################################################
+# Sysctl explainers
+##################################################################################################################
+explain_ip_forward() {
+    local causes=()
+
+    systemctl is-active --quiet libvirtd   2>/dev/null && causes+=("libvirtd — virtual machines (KVM/QEMU)")
+    systemctl is-active --quiet docker     2>/dev/null && causes+=("docker — containers")
+    systemctl is-active --quiet podman     2>/dev/null && causes+=("podman — containers")
+    systemctl is-active --quiet lxd        2>/dev/null && causes+=("lxd — containers")
+    systemctl is-active --quiet tailscaled 2>/dev/null && causes+=("tailscaled — Tailscale VPN")
+    systemctl is-active --quiet openvpn    2>/dev/null && causes+=("openvpn — VPN")
+
+    local wg_units
+    wg_units=$(systemctl list-units --state=active --no-legend 'wg-quick@*' 2>/dev/null | awk '{print $1}' | tr '\n' ' ')
+    [[ -n "${wg_units// /}" ]] && causes+=("WireGuard VPN (${wg_units% })")
+
+    local ovpn_units
+    ovpn_units=$(systemctl list-units --state=active --no-legend 'openvpn-client@*' 'openvpn-server@*' 2>/dev/null | awk '{print $1}' | tr '\n' ' ')
+    [[ -n "${ovpn_units// /}" ]] && causes+=("OpenVPN (${ovpn_units% })")
+
+    if [[ ${#causes[@]} -gt 0 ]]; then
+        warn_check "net.ipv4.ip_forward=1 — kiro sets 0, but overridden at runtime by:"
+        for c in "${causes[@]}"; do
+            echo "           - $c"
+        done
+        echo "         These services need packet forwarding to route traffic between"
+        echo "         virtual machines, containers, or VPN tunnels. This is expected."
+    else
+        warn_check "net.ipv4.ip_forward=1 — no known service identified; check: libvirtd, docker, WireGuard, OpenVPN"
+    fi
+}
+
+##################################################################################################################
+# Sysctl values
+##################################################################################################################
+check_sysctl() {
+    log_subsection "Sysctl Runtime Values"
+
+    local conf="/etc/sysctl.d/99-kiro-optimizations.conf"
+    if [[ ! -f "$conf" ]]; then
+        ko "Sysctl conf missing — skipping sysctl checks"
+        return
+    fi
+
+    local key value expected actual
+
+    while IFS= read -r line; do
+        # Skip comments and blank lines
+        [[ "$line" =~ ^[[:space:]]*# ]] && continue
+        [[ -z "${line//[[:space:]]/}" ]] && continue
+        [[ "$line" != *=* ]] && continue
+
+        key=$(echo "$line" | sed 's/[[:space:]]*=.*//' | tr -d '[:space:]')
+        value=$(echo "$line" | sed 's/^[^=]*=[[:space:]]*//')
+        # trim trailing whitespace
+        value=$(echo "$value" | sed 's/[[:space:]]*$//')
+
+        if ! actual=$(sysctl -n "$key" 2>/dev/null); then
+            warn_check "sysctl $key: not found in this kernel"
+            continue
+        fi
+
+        # Normalize whitespace (tabs to spaces, collapse multiples)
+        expected=$(echo "$value"  | tr -s '[:space:]' ' ' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
+        actual=$(echo  "$actual" | tr -s '[:space:]' ' ' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
+
+        if [[ "$actual" == "$expected" ]]; then
+            ok "sysctl $key = $actual"
+        elif [[ "$key" == "net.ipv4.ip_forward" && "$expected" == "0" && "$actual" == "1" ]]; then
+            explain_ip_forward
+        else
+            ko "sysctl $key: expected '$expected', got '$actual'"
+        fi
+    done < "$conf"
+}
+
+##################################################################################################################
+# ZRAM
+##################################################################################################################
+check_zram() {
+    log_subsection "ZRAM"
+
+    if [[ ! -b /dev/zram0 ]]; then
+        ko "ZRAM: /dev/zram0 not found (zram-generator not running or not installed)"
+        return
+    fi
+    ok "ZRAM: /dev/zram0 exists"
+
+    if swapon --show --noheadings 2>/dev/null | grep -q zram; then
+        local zram_line
+        zram_line=$(swapon --show --noheadings 2>/dev/null | grep zram | head -1)
+        ok "ZRAM: active as swap — $zram_line"
+    else
+        ko "ZRAM: /dev/zram0 exists but is not active as swap"
+    fi
+
+    if command -v zramctl &>/dev/null; then
+        local algo
+        algo=$(zramctl /dev/zram0 --output ALGORITHM --noheadings 2>/dev/null | tr -d '[:space:]' || echo "unknown")
+        if [[ "$algo" == "zstd" ]]; then
+            ok "ZRAM: compression = zstd"
+        else
+            warn_check "ZRAM: compression = $algo (expected zstd)"
+        fi
+
+        local size
+        size=$(zramctl /dev/zram0 --output DISKSIZE --noheadings 2>/dev/null || echo "unknown")
+        ok "ZRAM: disk size = $size"
+    else
+        skip_check "ZRAM: zramctl not available for detailed check"
+    fi
+}
+
+##################################################################################################################
+# IO schedulers
+##################################################################################################################
+_check_scheduler() {
+    local dev="$1"
+    local expected="$2"
+    local sched_file="/sys/block/$dev/queue/scheduler"
+
+    [[ -f "$sched_file" ]] || return 0
+
+    local raw
+    raw=$(cat "$sched_file")
+
+    if [[ "$raw" =~ \[([^]]+)\] ]]; then
+        local current="${BASH_REMATCH[1]}"
+        if [[ "$current" == "$expected" ]]; then
+            ok "IO scheduler $dev: $current"
+        else
+            ko "IO scheduler $dev: expected $expected, got $current (available: $raw)"
+        fi
+    elif [[ "$raw" == "$expected" ]]; then
+        ok "IO scheduler $dev: $raw"
+    else
+        ko "IO scheduler $dev: expected $expected, got: $raw"
+    fi
+}
+
+check_io_schedulers() {
+    log_subsection "IO Schedulers"
+
+    local found_any=0
+
+    for dev_path in /sys/block/*/; do
+        [[ -d "$dev_path" ]] || continue
+        local dev
+        dev=$(basename "$dev_path")
+        local sched_file="$dev_path/queue/scheduler"
+        [[ -f "$sched_file" ]] || continue
+        found_any=1
+
+        case "$dev" in
+            nvme*n*)
+                _check_scheduler "$dev" "none"
+                ;;
+            vd*)
+                _check_scheduler "$dev" "none"
+                ;;
+            mmcblk*)
+                _check_scheduler "$dev" "bfq"
+                ;;
+            sd*)
+                local rotational
+                rotational=$(cat "$dev_path/queue/rotational" 2>/dev/null || echo "0")
+                if [[ "$rotational" == "1" ]]; then
+                    _check_scheduler "$dev" "mq-deadline"
+                else
+                    _check_scheduler "$dev" "bfq"
+                fi
+                ;;
+            loop*|ram*|zram*)
+                # virtual devices — skip
+                ;;
+            *)
+                local raw
+                raw=$(cat "$sched_file" 2>/dev/null || echo "?")
+                ok "IO scheduler $dev: $raw (no rule, skipping)"
+                ;;
+        esac
+    done
+
+    if [[ $found_any -eq 0 ]]; then
+        warn_check "IO schedulers: no block devices found in /sys/block/"
+    fi
+}
+
+##################################################################################################################
+# Transparent Huge Pages
+##################################################################################################################
+check_thp() {
+    log_subsection "Transparent Huge Pages"
+
+    local thp_base="/sys/kernel/mm/transparent_hugepage"
+
+    if [[ ! -d "$thp_base" ]]; then
+        skip_check "THP: directory $thp_base not found (THP may be compiled out)"
+        return
+    fi
+
+    local defrag_file="$thp_base/defrag"
+    if [[ -f "$defrag_file" ]]; then
+        local raw
+        raw=$(cat "$defrag_file")
+        if [[ "$raw" == *"[defer+madvise]"* ]]; then
+            ok "THP defrag: defer+madvise"
+        else
+            ko "THP defrag: expected [defer+madvise], got: $raw"
+        fi
+    else
+        warn_check "THP defrag: file not found"
+    fi
+
+    local shmem_file="$thp_base/shmem_enabled"
+    if [[ -f "$shmem_file" ]]; then
+        local raw
+        raw=$(cat "$shmem_file")
+        if [[ "$raw" == *"[advise]"* ]]; then
+            ok "THP shmem_enabled: advise"
+        else
+            ko "THP shmem_enabled: expected [advise], got: $raw"
+        fi
+    else
+        warn_check "THP shmem_enabled: file not found"
+    fi
+
+    local khuge_file="$thp_base/khugepaged/max_ptes_none"
+    if [[ -f "$khuge_file" ]]; then
+        local val
+        val=$(cat "$khuge_file")
+        if [[ "$val" == "511" ]]; then
+            ok "THP khugepaged/max_ptes_none: 511"
+        else
+            warn_check "THP khugepaged/max_ptes_none: expected 511, got $val"
+        fi
+    fi
+}
+
+##################################################################################################################
+# Blacklisted modules
+##################################################################################################################
+check_modules() {
+    log_subsection "Blacklisted Modules"
+
+    local blacklisted=(iTCO_wdt sp5100_tco)
+
+    for mod in "${blacklisted[@]}"; do
+        if lsmod 2>/dev/null | awk '{print $1}' | grep -qx "$mod"; then
+            ko "Blacklisted module is loaded: $mod"
+        else
+            ok "Blacklisted module not loaded: $mod"
+        fi
+    done
+
+    # evbug logs every keystroke to the kernel log — should never be loaded
+    if lsmod 2>/dev/null | awk '{print $1}' | grep -qx "evbug"; then
+        ko "Security: evbug module is loaded (logs all input events to kernel log)"
+    else
+        ok "Security: evbug module not loaded"
+    fi
+}
+
+##################################################################################################################
+# Systemd units
+##################################################################################################################
+check_systemd_units() {
+    log_subsection "Systemd Unit State"
+
+    local failed_count
+    failed_count=$(systemctl list-units --state=failed --no-legend --no-pager 2>/dev/null | grep -c "." || true)
+
+    if [[ "$failed_count" -eq 0 ]]; then
+        ok "Systemd: no failed units"
+    else
+        ko "Systemd: $failed_count failed unit(s)"
+        systemctl list-units --state=failed --no-legend --no-pager 2>/dev/null | head -10 || true
+    fi
+
+    # pci-latency is a oneshot service — check result rather than active state
+    local pci_result
+    pci_result=$(systemctl show pci-latency.service --property=Result --value 2>/dev/null || echo "unknown")
+    if [[ "$pci_result" == "success" ]]; then
+        ok "Systemd pci-latency.service: completed successfully"
+    elif [[ "$pci_result" == "unknown" ]]; then
+        warn_check "Systemd pci-latency.service: not found or not started this boot"
+    else
+        ko "Systemd pci-latency.service: result=$pci_result"
+    fi
+
+    # zram-generator creates zram devices early in boot
+    local zram_state
+    zram_state=$(systemctl show "systemd-zram-setup@zram0.service" --property=ActiveState --value 2>/dev/null || echo "unknown")
+    if [[ "$zram_state" == "active" || "$zram_state" == "inactive" ]]; then
+        local zram_result
+        zram_result=$(systemctl show "systemd-zram-setup@zram0.service" --property=Result --value 2>/dev/null || echo "unknown")
+        if [[ "$zram_result" == "success" ]]; then
+            ok "Systemd zram-setup@zram0: completed successfully"
+        else
+            warn_check "Systemd zram-setup@zram0: state=$zram_state result=$zram_result"
+        fi
+    else
+        warn_check "Systemd zram-setup@zram0: state=$zram_state"
+    fi
+}
+
+##################################################################################################################
+# Journal error scan
+##################################################################################################################
+check_journal() {
+    log_subsection "Journal Error Scan"
+
+    # Boot-level errors
+    local boot_errors
+    boot_errors=$(journalctl -b -p err --no-pager -q 2>/dev/null | grep -c "." || true)
+
+    if [[ "$boot_errors" -eq 0 ]]; then
+        ok "Journal: no error-level entries since boot"
+    else
+        warn_check "Journal: $boot_errors error-level entries since boot"
+        echo "         Run: journalctl -b -p err --no-pager"
+    fi
+
+    # Kiro-specific warnings or errors
+    local kiro_issues
+    kiro_issues=$(journalctl -b --no-pager -q 2>/dev/null \
+        | grep -iE "(kiro|sysctl|modprobe|udev|zram|pci.latency)" \
+        | grep -iE "(error|fail|warn)" \
+        | grep -v "alsactl restore" \
+        | grep -c "." || true)
+
+    if [[ "$kiro_issues" -gt 0 ]]; then
+        warn_check "Journal: $kiro_issues kiro-related warnings/errors since boot"
+        journalctl -b --no-pager -q 2>/dev/null \
+            | grep -iE "(kiro|sysctl|modprobe|udev|zram|pci.latency)" \
+            | grep -iE "(error|fail|warn)" \
+            | grep -v "alsactl restore" \
+            | head -10 || true
+    else
+        ok "Journal: no kiro-related warnings/errors found"
+    fi
+
+    # dmesg errors (needs root when dmesg_restrict=1)
+    if dmesg -l err 2>/dev/null | grep -q .; then
+        local dmesg_errors
+        dmesg_errors=$(dmesg -l err 2>/dev/null | grep -c "." || true)
+        warn_check "dmesg: $dmesg_errors error-level kernel messages"
+        dmesg -l err 2>/dev/null | head -10 || true
+    elif dmesg >/dev/null 2>&1; then
+        ok "dmesg: no error-level kernel messages"
+    else
+        skip_check "dmesg: access restricted (run as root for full access)"
+    fi
+
+    # Udev errors
+    local udev_errors
+    udev_errors=$(journalctl -b -u systemd-udevd --no-pager -q 2>/dev/null \
+        | grep -iE "(error|fail)" \
+        | grep -v "alsactl restore" \
+        | grep -c "." || true)
+
+    if [[ "$udev_errors" -gt 0 ]]; then
+        warn_check "udev: $udev_errors errors in systemd-udevd log"
+        journalctl -b -u systemd-udevd --no-pager -q 2>/dev/null \
+            | grep -iE "(error|fail)" \
+            | grep -v "alsactl restore" \
+            | head -5 || true
+    else
+        ok "udev: no errors in systemd-udevd log"
+    fi
+}
+
+##################################################################################################################
+# Main
+##################################################################################################################
+main() {
+    log_section "Kiro System Configuration Verifier"
+
+    check_config_files
+    check_sysctl
+    check_zram
+    check_io_schedulers
+    check_thp
+    check_modules
+    check_systemd_units
+    check_journal
+
+    # ── Summary ──────────────────────────────────────────────────────────────
+    log_section "Verification Summary"
+    echo "  ${GREEN}PASS: ${PASS}${RESET}"
+    echo "  ${RED}FAIL: ${FAIL}${RESET}"
+    echo "  ${YELLOW}WARN: ${WARN}${RESET}"
+    echo "  ${CYAN}SKIP: ${SKIP}${RESET}"
+    echo
+
+    if [[ $FAIL -gt 0 ]]; then
+        log_warn "${FAIL} check(s) FAILED — review the output above"
+        exit 1
+    elif [[ $WARN -gt 0 ]]; then
+        log_warn "${WARN} warning(s) found — system functional but review recommended"
+    else
+        log_success "All checks passed"
+    fi
+}
+
+main "$@"

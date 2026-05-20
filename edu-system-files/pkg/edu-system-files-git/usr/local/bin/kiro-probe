@@ -1,0 +1,58 @@
+#!/bin/bash
+set -Euo pipefail
+##################################################################################################################
+# Author    : Erik Dubois
+# Website   : https://www.erikdubois.be
+##################################################################################################################
+#
+#   DO NOT JUST RUN THIS. EXAMINE AND JUDGE. RUN AT YOUR OWN RISK.
+#
+##################################################################################################################
+
+# shellcheck source=/usr/local/lib/kiro-common.sh
+if [[ -f /usr/local/lib/kiro-common.sh ]]; then
+    source /usr/local/lib/kiro-common.sh
+else
+    echo "ERROR: kiro-common.sh not found" >&2
+    exit 1
+fi
+
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+DRY_RUN=false
+
+main() {
+    for arg in "$@"; do
+        case "$arg" in
+            -h|--help)
+                show_help "$(basename "$0")" \
+                    "Upload a hardware probe to linux-hardware.org" \
+                    "[--help] [--version] [--dry-run]" \
+                    ""
+                exit 0
+                ;;
+            -v|--version)
+                show_version "$(basename "$0")"
+                exit 0
+                ;;
+            -d|--dry-run)
+                DRY_RUN=true
+                log_info "Dry-run mode enabled — no changes will be made"
+                ;;
+            *)
+                log_error "Unknown option: $arg"
+                exit 1
+                ;;
+        esac
+    done
+
+    if ! pacman -Qi hw-probe &>/dev/null; then
+        log_info "hw-probe is not installed. Installing it..."
+        execute_or_dryrun "Install hw-probe" sudo pacman -S --noconfirm --needed hw-probe
+    fi
+
+    execute_or_dryrun "Run hardware probe and upload" sudo -E /usr/bin/hw-probe -all -upload
+
+    log_success "$(basename "$0") done"
+}
+
+main "$@"

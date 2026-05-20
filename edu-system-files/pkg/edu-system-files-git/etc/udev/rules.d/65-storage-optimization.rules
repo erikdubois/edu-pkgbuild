@@ -1,0 +1,26 @@
+# ============================================================================
+# Storage Device Optimization - Speed and reliability
+# ============================================================================
+# Optimizes SSD/HDD settings for better responsiveness
+
+# SSD: Increase read-ahead for better sequential performance
+# 256KB is a good balance between performance and memory usage
+ACTION=="add", SUBSYSTEM=="block", KERNEL=="sd[a-z]*|nvme*", ATTR{queue/rotational}=="0", \
+  ATTR{queue/read_ahead_kb}="256"
+
+# HDD: Conservative read-ahead to avoid excessive seeking
+# 128KB is safe for mechanical drives
+ACTION=="add", SUBSYSTEM=="block", KERNEL=="sd[a-z]*", ATTR{queue/rotational}=="1", \
+  ATTR{queue/read_ahead_kb}="128"
+
+# Virtual/Cloud Block Devices: No optimization needed
+# ACTION=="add", SUBSYSTEM=="block", KERNEL=="vd[a-z]*", \
+#   ATTR{queue/read_ahead_kb}="512"
+
+# Removed rules and reasons:
+# - nvme set-feature -f 2: Feature ID 2 is Write Atomicity Normal, not APST.
+#   APST (Autonomous Power State Transition) is enabled by the kernel by default.
+# - hdparm -M 128: Sets Automatic Acoustic Management (not TRIM). Mostly
+#   ignored by modern drives; had nothing to do with TRIM.
+# - libata force_nrq: /sys/module/libata/parameters/force_nrq does not exist
+#   on modern kernels; NCQ is handled automatically.

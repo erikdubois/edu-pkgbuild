@@ -1,0 +1,716 @@
+#!/bin/bash
+set -euo pipefail
+#####################################################################
+# Author    : Erik Dubois
+# Website   : https://www.erikdubois.be
+#####################################################################
+#
+#   DO NOT JUST RUN THIS. EXAMINE AND JUDGE. RUN AT YOUR OWN RISK.
+#
+#####################################################################
+# Run this script on an installed Kiro system to verify the install
+# is correct. Add new checks over time. Run monthly.
+#####################################################################
+
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+
+#####################################################################
+# Colors
+#####################################################################
+if command -v tput >/dev/null 2>&1 && [[ -t 1 ]]; then
+    RED="$(tput setaf 1)"
+    GREEN="$(tput setaf 2)"
+    YELLOW="$(tput setaf 3)"
+    BLUE="$(tput setaf 4)"
+    CYAN="$(tput setaf 6)"
+    RESET="$(tput sgr0)"
+else
+    RED="" GREEN="" YELLOW="" BLUE="" CYAN="" RESET=""
+fi
+
+#####################################################################
+# Logging
+#####################################################################
+log_section() {
+    echo
+    echo "${GREEN}############################################################################${RESET}"
+    echo "$1"
+    echo "${GREEN}############################################################################${RESET}"
+    echo
+}
+
+log_info() {
+    echo
+    echo "${BLUE}############################################################################${RESET}"
+    echo "$1"
+    echo "${BLUE}############################################################################${RESET}"
+    echo
+}
+
+log_warn() {
+    echo
+    echo "${YELLOW}############################################################################${RESET}"
+    echo "$1"
+    echo "${YELLOW}############################################################################${RESET}"
+    echo
+}
+
+log_error() {
+    echo
+    echo "${RED}############################################################################${RESET}"
+    echo "$1"
+    echo "${RED}############################################################################${RESET}"
+    echo
+}
+
+log_success() {
+    echo
+    echo "${GREEN}############################################################################${RESET}"
+    echo "$1"
+    echo "${GREEN}############################################################################${RESET}"
+    echo
+}
+
+#####################################################################
+# Error handling
+#####################################################################
+on_error() {
+    local lineno="$1"
+    local cmd="$2"
+    echo
+    echo "${RED}ERROR on line ${lineno}: ${cmd}${RESET}"
+    echo
+    sleep 10
+}
+
+trap 'on_error "$LINENO" "$BASH_COMMAND"' ERR
+
+FIX_MODE=false
+
+for _arg in "$@"; do
+    case "$_arg" in
+        -h|--help)
+            cat <<'EOF'
+kiro-audit - Kiro ISO installed system audit
+
+Usage:
+    kiro-audit [--help] [--version] [--fix]
+
+Options:
+    -h, --help     Show this help message and exit
+    -v, --version  Show version information and exit
+    --fix          Auto-remediate known fixable failures (requires root)
+
+Description:
+    Comprehensive post-install audit of a Kiro system. Checks kernel,
+    microcode, mkinitcpio, audio stack, Calamares cleanup, kiro_final
+    configuration, pacman repositories, desktop environments, SDDM,
+    user groups, systemd services, file permissions, bootloader, and
+    package integrity.
+
+    In read-only mode (default), fixable FAILs show a FIX? hint with
+    the command that --fix would run.
+
+    Must be run as root: sudo kiro-audit
+
+For more information, visit: https://www.erikdubois.be
+EOF
+            exit 0
+            ;;
+        -v|--version)
+            pkg=$(pacman -Qqo "$(realpath "${BASH_SOURCE[0]}")" 2>/dev/null) \
+                && pacman -Q "${pkg}" \
+                || echo "kiro-audit (not installed via pacman)"
+            exit 0
+            ;;
+        --fix)
+            FIX_MODE=true
+            ;;
+    esac
+done
+unset _arg
+
+if [[ $EUID -ne 0 ]]; then
+    echo "Run kiro-audit with root privileges: sudo kiro-audit"
+    trap - ERR
+    exit 1
+fi
+
+#####################################################################
+# Counters
+#####################################################################
+PASS=0
+FAIL=0
+WARN=0
+FIXED=0
+
+pass() { echo "  ${GREEN}PASS${RESET}  $1"; PASS=$((PASS + 1)); }
+fail() { echo "  ${RED}FAIL${RESET}  $1"; FAIL=$((FAIL + 1)); }
+warn() { echo "  ${YELLOW}WARN${RESET}  $1"; WARN=$((WARN + 1)); }
+
+# apply_fix "description" cmd [args...]
+# --fix mode: prints description and runs cmd; increments FIXED on success.
+# read-only mode: prints a FIX? hint showing what would run.
+apply_fix() {
+    local msg="$1"; shift
+    if [[ "${FIX_MODE}" == true ]]; then
+        echo "  ${CYAN}FIX${RESET}   ${msg}"
+        if "$@"; then
+            FIXED=$((FIXED + 1))
+        else
+            echo "  ${RED}ERR${RESET}   fix failed: $*"
+        fi
+    else
+        echo "  ${CYAN}FIX?${RESET}  --fix: ${msg}"
+    fi
+}
+
+pkg_installed()  { pacman -Q "$1" &>/dev/null; }
+pkg_missing()    { ! pacman -Q "$1" &>/dev/null; }
+
+#####################################################################
+# Functions
+#####################################################################
+check_kernel() {
+    log_section "Kernel"
+
+    local running
+    running=$(uname -r)
+    if [[ "${running}" == *lqx* ]]; then
+        pass "Running kernel is linux-lqx: ${running}"
+    else
+        fail "Expected linux-lqx kernel, got: ${running}"
+    fi
+
+    [[ -f /boot/vmlinuz-linux-lqx ]]   && pass "/boot/vmlinuz-linux-lqx present"   || fail "/boot/vmlinuz-linux-lqx missing"
+    [[ -f /boot/initramfs-linux-lqx.img ]] && pass "/boot/initramfs-linux-lqx.img present" || fail "/boot/initramfs-linux-lqx.img missing"
+    pkg_installed linux-lqx            && pass "linux-lqx package installed"         || fail "linux-lqx package not installed"
+    pkg_installed linux-lqx-headers    && pass "linux-lqx-headers installed"          || fail "linux-lqx-headers not installed"
+}
+
+check_microcode() {
+    log_section "Microcode"
+
+    if [[ -f /boot/intel-ucode.img ]]; then
+        pass "intel-ucode.img present in /boot"
+        pkg_missing amd-ucode && pass "amd-ucode not installed (Intel system)" || warn "amd-ucode also installed on Intel system"
+    elif [[ -f /boot/amd-ucode.img ]]; then
+        pass "amd-ucode.img present in /boot"
+        pkg_missing intel-ucode && pass "intel-ucode not installed (AMD system)" || warn "intel-ucode also installed on AMD system"
+    else
+        fail "No microcode image found in /boot"
+    fi
+}
+
+check_mkinitcpio() {
+    log_section "mkinitcpio"
+
+    local hooks
+    hooks=$(grep '^HOOKS=' /etc/mkinitcpio.conf | head -1)
+
+    # Must NOT have archiso hook
+    if echo "${hooks}" | grep -q 'archiso'; then
+        fail "archiso hook still present in mkinitcpio.conf HOOKS"
+    else
+        pass "No archiso hook in mkinitcpio.conf"
+    fi
+
+    # Must have microcode and kms
+    echo "${hooks}" | grep -q 'microcode' && pass "microcode hook present" || fail "microcode hook missing from HOOKS"
+    echo "${hooks}" | grep -q 'kms'       && pass "kms hook present"       || fail "kms hook missing from HOOKS"
+
+    # Only linux-lqx preset, no plain linux preset
+    [[ -f /etc/mkinitcpio.d/linux-lqx.preset ]] && pass "linux-lqx.preset exists"                     || fail "linux-lqx.preset missing"
+    [[ -f /etc/mkinitcpio.d/linux.preset ]]      && fail "linux.preset leftover not cleaned up"        || pass "linux.preset leftover not present (good)"
+}
+
+check_audio() {
+    log_section "Audio stack"
+
+    for pkg in pipewire pipewire-alsa pipewire-audio pipewire-pulse wireplumber; do
+        pkg_installed "${pkg}" && pass "${pkg} installed" || fail "${pkg} missing"
+    done
+
+    pkg_missing pulseaudio && pass "pulseaudio not installed (good)" || fail "pulseaudio still installed — conflicts with PipeWire"
+}
+
+check_calamares_cleanup() {
+    log_section "Calamares cleanup"
+
+    pkg_missing calamares              && pass "calamares binary removed"              || fail "calamares still installed"
+    pkg_missing mkinitcpio-archiso     && pass "mkinitcpio-archiso removed"            || fail "mkinitcpio-archiso still installed"
+    pkg_missing memtest86+             && pass "memtest86+ removed"                    || warn "memtest86+ still installed"
+    if pkg_missing kiro-calamares-config-next; then
+        pass "kiro-calamares-config-next removed"
+        [[ -d /etc/calamares ]] && warn "/etc/calamares config dir still present after package removal" || pass "/etc/calamares directory removed"
+    else
+        fail "kiro-calamares-config-next still installed (kiro_final removal step failed)"
+    fi
+
+    # kiro_final live-only artifact cleanup
+    if [[ -f /root/.automated_script.sh ]]; then
+        fail "/root/.automated_script.sh archiso leftover present"
+        apply_fix "rm /root/.automated_script.sh" rm /root/.automated_script.sh
+    else
+        pass "No /root/.automated_script.sh (good)"
+    fi
+
+    if [[ -f /root/.zlogin ]]; then
+        fail "/root/.zlogin archiso leftover present"
+        apply_fix "rm /root/.zlogin" rm /root/.zlogin
+    else
+        pass "No /root/.zlogin (good)"
+    fi
+
+    if [[ -d /etc/systemd/system/getty@tty1.service.d ]]; then
+        fail "getty@tty1 autologin not cleaned up"
+        apply_fix "rm -rf /etc/systemd/system/getty@tty1.service.d" rm -rf /etc/systemd/system/getty@tty1.service.d
+    else
+        pass "getty@tty1 autologin removed (good)"
+    fi
+
+    if [[ -f /etc/sudoers.d/g_wheel ]]; then
+        fail "/etc/sudoers.d/g_wheel live-only rule still present"
+        apply_fix "rm /etc/sudoers.d/g_wheel" rm /etc/sudoers.d/g_wheel
+    else
+        pass "/etc/sudoers.d/g_wheel removed (good)"
+    fi
+
+    if [[ -f /etc/polkit-1/rules.d/49-nopasswd_global.rules ]]; then
+        fail "49-nopasswd_global.rules live-only rule still present"
+        apply_fix "rm /etc/polkit-1/rules.d/49-nopasswd_global.rules" rm /etc/polkit-1/rules.d/49-nopasswd_global.rules
+    else
+        pass "49-nopasswd_global.rules removed (good)"
+    fi
+
+}
+
+check_kiro_final_config() {
+    log_section "kiro_final configuration"
+
+    # /root permissions
+    local root_perm
+    root_perm=$(stat -c '%a' /root 2>/dev/null)
+    [[ "${root_perm}" == "700" ]] && pass "/root permissions: 700" || fail "/root permissions wrong: ${root_perm} (expected 700)"
+
+    # sudoers.d permissions
+    local sudoers_perm
+    sudoers_perm=$(stat -c '%a' /etc/sudoers.d 2>/dev/null)
+    [[ "${sudoers_perm}" == "750" ]] && pass "/etc/sudoers.d permissions: 750" || fail "/etc/sudoers.d permissions wrong: ${sudoers_perm} (expected 750)"
+
+    # polkit-1/rules.d permissions
+    local polkit_perm
+    polkit_perm=$(stat -c '%a' /etc/polkit-1/rules.d 2>/dev/null || echo "missing")
+    [[ "${polkit_perm}" == "750" ]] && pass "/etc/polkit-1/rules.d permissions: 750" || fail "/etc/polkit-1/rules.d permissions wrong: ${polkit_perm} (expected 750)"
+
+    # EDITOR=nano in /etc/profile
+    grep -q 'EDITOR=nano' /etc/profile 2>/dev/null && pass "EDITOR=nano set in /etc/profile" || fail "EDITOR=nano not set in /etc/profile"
+
+    # Bluetooth AutoEnable
+    grep -q '^AutoEnable=true' /etc/bluetooth/main.conf 2>/dev/null && pass "Bluetooth AutoEnable=true" || fail "Bluetooth AutoEnable not set in /etc/bluetooth/main.conf"
+
+    # makepkg.conf optimizations (kiro_before)
+    local nproc_count makeflags_j
+    nproc_count=$(nproc)
+    makeflags_j=$(grep '^MAKEFLAGS=' /etc/makepkg.conf 2>/dev/null | grep -oP '(?<=-j)\d+' || echo "0")
+    if [[ "${makeflags_j}" -eq "${nproc_count}" ]]; then
+        pass "makepkg.conf MAKEFLAGS=-j${nproc_count} (all CPUs used)"
+    elif [[ "${makeflags_j}" -gt 0 ]]; then
+        warn "makepkg.conf MAKEFLAGS=-j${makeflags_j} but system has ${nproc_count} CPUs"
+    else
+        fail "makepkg.conf MAKEFLAGS not set to use all CPUs"
+    fi
+    grep -q "^PKGEXT='.pkg.tar.zst'" /etc/makepkg.conf 2>/dev/null && pass "makepkg.conf PKGEXT=.pkg.tar.zst" || fail "makepkg.conf PKGEXT not set to .pkg.tar.zst"
+    grep -qP '^OPTIONS=.*!debug' /etc/makepkg.conf 2>/dev/null && pass "makepkg.conf !debug in OPTIONS" || fail "makepkg.conf debug not disabled in OPTIONS"
+}
+
+check_pacman_repos() {
+    log_section "Pacman repositories"
+
+    grep -q '^\[nemesis_repo\]' /etc/pacman.conf && pass "nemesis_repo in pacman.conf" || fail "nemesis_repo missing from pacman.conf"
+    grep -q '^\[chaotic-aur\]'  /etc/pacman.conf && pass "chaotic-aur in pacman.conf"  || fail "chaotic-aur missing from pacman.conf"
+    grep -q '^\[multilib\]'     /etc/pacman.conf && pass "multilib in pacman.conf"     || warn "multilib missing from pacman.conf"
+}
+
+check_desktop() {
+    log_section "Desktop environments"
+
+    pkg_installed ohmychadwm-git && pass "ohmychadwm-git installed" || fail "ohmychadwm-git not installed"
+    pkg_installed xfwm4           && pass "xfwm4 installed"          || fail "xfwm4 not installed"
+    pkg_missing   edu-chadwm      && pass "edu-chadwm not installed (dropped)" || warn "edu-chadwm still installed — should be removed"
+
+    [[ -f /usr/share/xsessions/ohmychadwm.desktop ]] && pass "ohmychadwm.desktop session file present" || fail "ohmychadwm.desktop missing"
+    [[ -f /usr/share/xsessions/xfce.desktop ]]       && pass "xfce.desktop session file present"       || fail "xfce.desktop missing"
+}
+
+check_sddm() {
+    log_section "SDDM"
+
+    pkg_installed sddm && pass "sddm installed" || fail "sddm not installed"
+    systemctl is-enabled sddm &>/dev/null && pass "sddm.service enabled" || fail "sddm.service not enabled"
+
+    if grep -q 'edu-simplicity' /etc/sddm.conf.d/*.conf 2>/dev/null || grep -q 'edu-simplicity' /etc/sddm.conf 2>/dev/null; then
+        pass "SDDM theme set to edu-simplicity"
+    else
+        warn "SDDM theme not set to edu-simplicity"
+    fi
+}
+
+check_user_groups() {
+    log_section "User groups"
+
+    local user
+    user=$(getent passwd 1000 | cut -d: -f1)
+    if [[ -z "${user}" ]]; then
+        warn "No user with UID 1000 found — skipping group checks"
+        return
+    fi
+
+    log_info "Checking groups for user: ${user}"
+    local groups
+    groups=$(groups "${user}")
+
+    for grp in wheel audio video storage optical network; do
+        echo "${groups}" | grep -q "${grp}" && pass "${user} in group: ${grp}" || fail "${user} not in group: ${grp}"
+    done
+}
+
+check_services() {
+    log_section "Systemd services"
+
+    for svc in NetworkManager sddm bluetooth; do
+        systemctl is-enabled "${svc}" &>/dev/null && pass "${svc} enabled" || warn "${svc} not enabled"
+    done
+
+    # These should NOT be enabled on installed system
+    if systemctl is-enabled pacman-init &>/dev/null; then
+        fail "pacman-init still enabled (archiso leftover)"
+        apply_fix "systemctl mask pacman-init" systemctl mask pacman-init
+    else
+        pass "pacman-init not enabled (good)"
+    fi
+    systemctl is-enabled reflector   &>/dev/null && warn "reflector enabled (was this intentional?)" || true
+
+    # cgroup delegation for user sessions (required by ananicy-cpp)
+    local delegate="/usr/lib/systemd/system/user@.service.d/delegate.conf"
+    if [[ -f "${delegate}" ]]; then
+        grep -q 'Delegate=' "${delegate}" \
+            && pass "user@.service.d/delegate.conf present (cgroup delegation enabled)" \
+            || fail "user@.service.d/delegate.conf present but Delegate= line missing"
+    else
+        fail "user@.service.d/delegate.conf missing — ananicy-cpp cgroup support broken"
+    fi
+
+    # ananicy-cpp must be installed and enabled
+    pkg_installed ananicy-cpp \
+        && pass "ananicy-cpp installed" \
+        || fail "ananicy-cpp not installed"
+    systemctl is-enabled ananicy-cpp &>/dev/null \
+        && pass "ananicy-cpp.service enabled" \
+        || fail "ananicy-cpp.service not enabled"
+}
+
+check_permissions() {
+    log_section "Key file permissions"
+
+    local shadow_perm gshadow_perm
+    shadow_perm=$(stat -c '%a' /etc/shadow   2>/dev/null || echo "missing")
+    gshadow_perm=$(stat -c '%a' /etc/gshadow 2>/dev/null || echo "missing")
+
+    [[ "${shadow_perm}"  == "400" ]] && pass "/etc/shadow permissions: 400"   || fail "/etc/shadow permissions wrong: ${shadow_perm} (expected 400)"
+    [[ "${gshadow_perm}" == "400" ]] && pass "/etc/gshadow permissions: 400"  || fail "/etc/gshadow permissions wrong: ${gshadow_perm} (expected 400)"
+
+    # CUPS config files — world-readable in older Kiro; fixed via tmpfiles.d
+    [[ -f /etc/tmpfiles.d/cups-permissions.conf ]] \
+        && pass "/etc/tmpfiles.d/cups-permissions.conf present" \
+        || fail "/etc/tmpfiles.d/cups-permissions.conf missing (CUPS config permissions not enforced)"
+
+    if [[ -f /etc/cups/classes.conf ]]; then
+        local cups_class_perm
+        cups_class_perm=$(stat -c '%a' /etc/cups/classes.conf)
+        if [[ "${cups_class_perm}" == "600" ]]; then
+            pass "/etc/cups/classes.conf permissions: 600"
+        else
+            fail "/etc/cups/classes.conf permissions wrong: ${cups_class_perm} (expected 600)"
+            if [[ -f /etc/tmpfiles.d/cups-permissions.conf ]]; then
+                apply_fix "systemd-tmpfiles --create /etc/tmpfiles.d/cups-permissions.conf" systemd-tmpfiles --create /etc/tmpfiles.d/cups-permissions.conf
+            else
+                apply_fix "chmod 600 /etc/cups/classes.conf" chmod 600 /etc/cups/classes.conf
+            fi
+        fi
+    fi
+
+    if [[ -f /etc/cups/printers.conf ]]; then
+        local cups_printers_perm
+        cups_printers_perm=$(stat -c '%a' /etc/cups/printers.conf)
+        if [[ "${cups_printers_perm}" == "600" ]]; then
+            pass "/etc/cups/printers.conf permissions: 600"
+        else
+            fail "/etc/cups/printers.conf permissions wrong: ${cups_printers_perm} (expected 600)"
+            if [[ -f /etc/tmpfiles.d/cups-permissions.conf ]]; then
+                apply_fix "systemd-tmpfiles --create /etc/tmpfiles.d/cups-permissions.conf" systemd-tmpfiles --create /etc/tmpfiles.d/cups-permissions.conf
+            else
+                apply_fix "chmod 600 /etc/cups/printers.conf" chmod 600 /etc/cups/printers.conf
+            fi
+        fi
+    fi
+}
+
+check_dev_rel() {
+    log_section "ISO version"
+
+    if [[ -f /etc/dev-rel ]]; then
+        pass "/etc/dev-rel present"
+        echo "  ${CYAN}INFO${RESET}  $(cat /etc/dev-rel)"
+    else
+        fail "/etc/dev-rel missing"
+    fi
+}
+
+check_nvidia() {
+    log_section "NVIDIA"
+
+    if lspci 2>/dev/null | grep -qi nvidia; then
+        log_info "NVIDIA GPU detected"
+        pkg_installed nvidia-open-dkms  && pass "nvidia-open-dkms installed"  || warn "NVIDIA GPU present but nvidia-open-dkms not installed"
+        pkg_installed nvidia-utils       && pass "nvidia-utils installed"       || warn "nvidia-utils not installed"
+    else
+        pass "No NVIDIA GPU detected — DKMS packages not expected"
+        pkg_missing nvidia-open-dkms && pass "nvidia-open-dkms not installed (no GPU, good)" || warn "nvidia-open-dkms installed but no NVIDIA GPU detected"
+    fi
+}
+
+check_package_integrity() {
+    log_section "Package integrity (pacman -Qk)"
+
+    local missing
+    missing=$(pacman -Qk 2>/dev/null \
+        | grep -v ' 0 missing files$' \
+        | grep 'missing files' \
+        | grep -v '^ohmychadwm-git:' \
+        | grep -v '^bind:' \
+        | grep -v '^cups:' \
+        | grep -v '^nfs-utils:') || true
+
+    if [[ -z "${missing}" ]]; then
+        pass "All packages have no missing files"
+    else
+        fail "Packages with missing files:"
+        echo "${missing}" | while read -r line; do
+            echo "        ${line}"
+        done
+    fi
+}
+
+check_sysctl_security() {
+    log_section "Sysctl security baseline"
+
+    local key expected actual
+    declare -A expected_values=(
+        [kernel.kptr_restrict]=2
+        [kernel.dmesg_restrict]=1
+        [kernel.yama.ptrace_scope]=1
+        [kernel.unprivileged_bpf_disabled]=1
+        [kernel.perf_event_paranoid]=3
+        [fs.suid_dumpable]=0
+        [net.ipv4.conf.all.send_redirects]=0
+        [net.ipv4.tcp_syncookies]=1
+    )
+
+    for key in "${!expected_values[@]}"; do
+        expected="${expected_values[$key]}"
+        actual=$(sysctl -n "${key}" 2>/dev/null || echo "unavailable")
+        if [[ "${actual}" == "unavailable" ]]; then
+            warn "${key} not supported by this kernel"
+        elif [[ "${actual}" == "${expected}" ]]; then
+            pass "${key} = ${actual}"
+        else
+            fail "${key} = ${actual} (expected ${expected})"
+        fi
+    done
+}
+
+check_zram() {
+    log_section "ZRAM"
+
+    pkg_installed zram-generator && pass "zram-generator installed" || fail "zram-generator not installed"
+    [[ -f /etc/systemd/zram-generator.conf ]] && pass "zram-generator.conf present" || fail "zram-generator.conf missing"
+    [[ -b /dev/zram0 ]] && pass "/dev/zram0 device present" || fail "/dev/zram0 not present — ZRAM not active"
+
+    if [[ -b /dev/zram0 ]]; then
+        if swapon --show | grep -q zram0; then
+            local zram_size
+            zram_size=$(swapon --show --noheadings | grep zram0 | awk '{print $3}')
+            pass "/dev/zram0 active as swap (${zram_size})"
+        else
+            fail "/dev/zram0 exists but not active as swap"
+        fi
+
+        local algo
+        algo=$(zramctl --noheadings -o ALGORITHM /dev/zram0 2>/dev/null || echo "unknown")
+        [[ "${algo}" == "zstd" ]] && pass "ZRAM compression: zstd" || warn "ZRAM compression: ${algo} (expected zstd)"
+    fi
+}
+
+check_udev_rules() {
+    log_section "Udev rules"
+
+    # IO scheduler — correct assignment per device type (from CachyOS research)
+    local rules_file="/etc/udev/rules.d/60-io-scheduler.rules"
+    if [[ -f "${rules_file}" ]]; then
+        pass "60-io-scheduler.rules present"
+        grep -q 'rotational.*=="0".*mq-deadline\|mq-deadline.*rotational.*=="0"' "${rules_file}" \
+            && pass "IO scheduler: SSD → mq-deadline" \
+            || fail "IO scheduler: SSD not set to mq-deadline (check 60-io-scheduler.rules)"
+        grep -q 'rotational.*=="1".*bfq\|bfq.*rotational.*=="1"' "${rules_file}" \
+            && pass "IO scheduler: HDD → bfq" \
+            || fail "IO scheduler: HDD not set to bfq (check 60-io-scheduler.rules)"
+        grep -q 'nvme.*none\|none.*nvme' "${rules_file}" \
+            && pass "IO scheduler: NVMe → none" \
+            || warn "IO scheduler: NVMe rule not found in 60-io-scheduler.rules"
+    else
+        fail "60-io-scheduler.rules missing"
+    fi
+
+    local hid_rules="/etc/udev/rules.d/66-input-optimization.rules"
+    if [[ -f "${hid_rules}" ]]; then
+        pass "66-input-optimization.rules present"
+    else
+        fail "66-input-optimization.rules missing"
+    fi
+}
+
+
+check_resolved_config() {
+    log_section "systemd-resolved configuration"
+
+    local drop_in
+    drop_in=$(grep -rl 'MulticastDNS=no' /etc/systemd/resolved.conf /etc/systemd/resolved.conf.d/ 2>/dev/null | head -1 || true)
+    if [[ -n "${drop_in}" ]]; then
+        pass "MulticastDNS=no set (${drop_in}) — avahi owns mDNS"
+    else
+        warn "MulticastDNS not disabled in systemd-resolved; may conflict with avahi-daemon"
+    fi
+
+    local hosts_no
+    hosts_no=$(grep -rl 'ReadEtcHosts=no' /etc/systemd/resolved.conf /etc/systemd/resolved.conf.d/ 2>/dev/null | head -1 || true)
+    if [[ -n "${hosts_no}" ]]; then
+        pass "ReadEtcHosts=no set (${hosts_no}) — resolved skips hBlock hosts file"
+    else
+        warn "ReadEtcHosts not disabled; resolved will parse /etc/hosts on every boot (slow with hBlock)"
+    fi
+}
+
+check_tumbler() {
+    log_section "Tumbler / thumbnailing"
+
+    pkg_installed libgepub \
+        && pass "libgepub installed (tumbler EPUB thumbnailer)" \
+        || fail "libgepub missing — tumbler logs 'cannot open shared object file: libgepub-0.7.so.0' on every file-manager launch"
+}
+
+check_failed_units() {
+    log_section "Failed systemd units"
+
+    local failed_count
+    failed_count=$(systemctl --failed --no-legend 2>/dev/null | wc -l)
+
+    if [[ "${failed_count}" -eq 0 ]]; then
+        pass "No failed systemd units"
+    else
+        fail "${failed_count} failed systemd unit(s):"
+        systemctl --failed --no-legend | while read -r line; do
+            echo "        ${line}"
+        done
+    fi
+}
+
+check_boot_and_updates() {
+    log_section "Boot time and updates (info)"
+
+    local boot_summary
+    boot_summary=$(systemd-analyze 2>/dev/null | head -1)
+    echo "  ${CYAN}INFO${RESET}  Boot: ${boot_summary}"
+
+    local update_count
+    update_count=$(checkupdates 2>/dev/null | wc -l || true)
+    if [[ "${update_count}" -eq 0 ]]; then
+        echo "  ${CYAN}INFO${RESET}  Pending updates: 0"
+    else
+        echo "  ${YELLOW}INFO${RESET}  Pending updates: ${update_count} package(s) available"
+    fi
+}
+
+check_bootloader() {
+    log_section "Bootloader"
+
+    if [[ -d /sys/firmware/efi ]]; then
+        pass "System booted via UEFI"
+        if command -v bootctl &>/dev/null && efibootmgr 2>/dev/null | grep -qi 'Linux Boot Manager'; then
+            pass "systemd-boot is installed"
+        elif [[ -d /boot/grub ]]; then
+            pass "GRUB EFI bootloader detected"
+        else
+            warn "UEFI system but bootloader type unclear"
+        fi
+    else
+        pass "System booted via BIOS"
+        [[ -d /boot/grub ]] && pass "GRUB BIOS bootloader detected" || warn "BIOS system but no GRUB found"
+    fi
+}
+
+#####################################################################
+# Main
+#####################################################################
+main() {
+    log_section "Kiro ISO — Installed System Audit"
+    echo "  Host   : $(hostname)"
+    echo "  Kernel : $(uname -r)"
+    echo "  Date   : $(date)"
+
+    check_kernel
+    check_microcode
+    check_mkinitcpio
+    check_audio
+    check_calamares_cleanup
+    check_kiro_final_config
+    check_pacman_repos
+    check_desktop
+    check_sddm
+    check_user_groups
+    check_services
+    check_zram
+    check_udev_rules
+    check_permissions
+    check_sysctl_security
+    check_resolved_config
+    check_tumbler
+    check_failed_units
+    check_dev_rel
+    check_nvidia
+    check_bootloader
+    check_boot_and_updates
+    check_package_integrity
+
+    log_section "Audit Summary"
+    echo "  ${GREEN}PASS: ${PASS}${RESET}"
+    echo "  ${YELLOW}WARN: ${WARN}${RESET}"
+    echo "  ${RED}FAIL: ${FAIL}${RESET}"
+    [[ "${FIX_MODE}" == true ]] && echo "  ${CYAN}FIXED: ${FIXED}${RESET}"
+    echo
+
+    if [[ ${FAIL} -gt 0 ]]; then
+        if [[ "${FIX_MODE}" == true && ${FIXED} -gt 0 ]]; then
+            log_warn "Audit found ${FAIL} failure(s); ${FIXED} fix(es) applied — re-run to confirm"
+        else
+            log_error "Audit completed with ${FAIL} failure(s)"
+        fi
+        exit 1
+    elif [[ ${WARN} -gt 0 ]]; then
+        log_warn "Audit completed with ${WARN} warning(s)"
+    else
+        log_success "$(basename "$0") — all checks passed"
+    fi
+}
+
+main "$@"

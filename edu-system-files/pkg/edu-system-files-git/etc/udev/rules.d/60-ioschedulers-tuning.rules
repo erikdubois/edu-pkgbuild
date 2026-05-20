@@ -1,0 +1,19 @@
+# I/O Scheduler Tuning Rules
+# Optimizes I/O performance for different device types
+# Imported from EndeavourOS standards
+
+# SSD: no BFQ tuning — 60-io-scheduler.rules sets SSDs to mq-deadline;
+# queue/iosched/ does not exist under mq-deadline so slice_idle_us is unavailable.
+
+# NVMe: Reduce polling delay for responsiveness
+ACTION=="add|change", KERNEL=="nvme[0-9]*n[0-9]*", \
+  ATTR{queue/io_poll_delay}="0"
+
+# HDD: Tune BFQ FIFO batch for sequential throughput.
+# 60-io-scheduler.rules (processed first, alphabetically) sets HDDs to BFQ,
+# so queue/iosched/fifo_batch is available by the time this rule fires.
+ACTION=="add|change", SUBSYSTEM=="block", \
+  KERNEL=="sd[a-z]*", ATTR{queue/rotational}=="1", \
+  ATTR{queue/iosched/fifo_batch}="32"
+
+# Note: read_ahead_kb rules removed - attribute only exists on block devices, not partitions

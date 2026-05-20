@@ -1,0 +1,24 @@
+# ============================================================================
+# Audio Device Power Management
+# ============================================================================
+# Manages power state for USB audio devices and general sound hardware.
+# HDA Intel / snd_hda_intel devices are handled in 68-sound-power.rules.
+
+# USB audio: allow autosuspend after 10 seconds idle
+# Prevents clicks/pops from overly aggressive power transitions
+ACTION=="add", SUBSYSTEM=="usb", ATTR{idVendor}=="*", ATTR{bInterfaceClass}=="01", \
+  ATTR{power/autosuspend_delay_ms}="10000", \
+  ATTR{power/control}="auto"
+
+# USB MIDI: keep awake (latency-sensitive, autosuspend causes xruns)
+ACTION=="add", SUBSYSTEM=="usb", ATTR{bInterfaceClass}=="01", ATTR{bInterfaceSubClass}=="03", \
+  ATTR{power/control}="on"
+
+# Bluetooth audio (btusb): moderate autosuspend
+ACTION=="add", SUBSYSTEM=="usb", DRIVERS=="btusb", \
+  ATTR{power/autosuspend_delay_ms}="5000", \
+  ATTR{power/control}="auto"
+
+# PCIe sound cards (not HDA): enable runtime power management
+ACTION=="add", SUBSYSTEM=="pci", ATTR{class}=="0x040100", \
+  ATTR{power/control}="auto"

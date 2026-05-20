@@ -1,0 +1,67 @@
+#!/bin/bash
+set -Euo pipefail
+##################################################################################################################
+# Author    : Erik Dubois
+# Website   : https://www.erikdubois.be
+##################################################################################################################
+#
+#   DO NOT JUST RUN THIS. EXAMINE AND JUDGE. RUN AT YOUR OWN RISK.
+#
+##################################################################################################################
+
+# shellcheck source=/usr/local/lib/kiro-common.sh
+if [[ -f /usr/local/lib/kiro-common.sh ]]; then
+    source /usr/local/lib/kiro-common.sh
+else
+    echo "ERROR: kiro-common.sh not found" >&2
+    exit 1
+fi
+
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+DRY_RUN=false
+
+main() {
+    for arg in "$@"; do
+        case "$arg" in
+            -h|--help)
+                show_help "$(basename "$0")" \
+                    "Configure makepkg.conf for the current CPU core count" \
+                    "[--help] [--version] [--dry-run]" \
+                    ""
+                exit 0
+                ;;
+            -v|--version)
+                show_version "$(basename "$0")"
+                exit 0
+                ;;
+            -d|--dry-run)
+                DRY_RUN=true
+                log_info "Dry-run mode enabled — no changes will be made"
+                ;;
+            *)
+                log_error "Unknown option: $arg"
+                exit 1
+                ;;
+        esac
+    done
+
+    log_section "kiro-set-cores"
+
+    local numberofcores
+    numberofcores=$(nproc)
+
+    if [ "$numberofcores" -gt 1 ]; then
+        log_info "Changing the makeflags for $numberofcores cores."
+        execute_or_dryrun "Set MAKEFLAGS=-j${numberofcores} in makepkg.conf" \
+            sudo sed -i 's/#MAKEFLAGS="-j2"/MAKEFLAGS="-j'"$numberofcores"'"/g' /etc/makepkg.conf
+        log_info "Changing the PKGEXT to pkg.tar.zst"
+        execute_or_dryrun "Set PKGEXT=.pkg.tar.zst in makepkg.conf" \
+            sudo sed -i "s/PKGEXT='.pkg.tar.xz'/PKGEXT='.pkg.tar.zst'/g" /etc/makepkg.conf
+    else
+        log_info "Single core detected — no change."
+    fi
+
+    log_success "$(basename "$0") done"
+}
+
+main "$@"

@@ -1,0 +1,80 @@
+#!/bin/bash
+set -Euo pipefail
+##################################################################################################################
+# Author    : Erik Dubois
+# Website   : https://www.erikdubois.be
+##################################################################################################################
+#
+#   DO NOT JUST RUN THIS. EXAMINE AND JUDGE. RUN AT YOUR OWN RISK.
+#
+##################################################################################################################
+
+# shellcheck source=/usr/local/lib/kiro-common.sh
+if [[ -f /usr/local/lib/kiro-common.sh ]]; then
+    source /usr/local/lib/kiro-common.sh
+else
+    echo "ERROR: kiro-common.sh not found" >&2
+    exit 1
+fi
+
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+DRY_RUN=false
+
+main() {
+    for arg in "$@"; do
+        case "$arg" in
+            -h|--help)
+                show_help "$(basename "$0")" \
+                    "Identify the active GPU driver and OpenGL renderer" \
+                    "[--help] [--version] [--dry-run]" \
+                    ""
+                exit 0
+                ;;
+            -v|--version)
+                show_version "$(basename "$0")"
+                exit 0
+                ;;
+            -d|--dry-run)
+                DRY_RUN=true
+                log_info "Dry-run mode enabled — no changes will be made"
+                ;;
+            *)
+                log_error "Unknown option: $arg"
+                exit 1
+                ;;
+        esac
+    done
+
+    log_warn "Some commands will give no output or error messages — one of them should give you info"
+
+    log_section "Check 1 — lspci"
+    echo "command 1:"
+    lspci -vnnn | perl -lne 'print if /^\d+\:.+(\[\S+\:\S+\])/' | grep VGA
+    echo
+    echo "command 2:"
+    lspci -x | grep VGA
+
+    log_section "Check 2 — glxinfo"
+    if test -f /usr/bin/glxinfo; then
+        log_info "glxinfo is present"
+    else
+        log_info "Installing glxinfo (note: conflicts with mesa-demos)"
+        execute_or_dryrun "Install glxinfo" sudo pacman -S glxinfo --noconfirm
+    fi
+    if [[ "$DRY_RUN" == "true" ]] && ! command -v glxinfo &>/dev/null; then
+        log_info "[DRY-RUN] Would run: glxinfo | grep OpenGL vendor/renderer"
+    else
+        glxinfo | grep -E "OpenGL vendor|OpenGL renderer*"
+    fi
+
+    log_section "Check 3 — nvidia-smi"
+    if test -f /usr/bin/nvidia-smi; then
+        nvidia-smi -L
+    else
+        log_info "No nvidia driver present"
+    fi
+
+    log_success "$(basename "$0") done"
+}
+
+main "$@"

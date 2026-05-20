@@ -1,0 +1,30 @@
+# ============================================================================
+# Advanced Sound Card Power Management
+# ============================================================================
+
+# Jack detection: restore ALSA state when a sound card is detected
+# Ensures mixer levels and routing are preserved across hotplug events
+ACTION=="add", SUBSYSTEM=="sound", KERNEL=="card*", \
+  RUN+="/usr/bin/alsactl restore 2>/dev/null || true"
+
+# snd_hda_intel: disable power saving on AC, enable on battery.
+# Prevents audio cracks/pops on AC while saving power on battery.
+# On first card detection, saves the current power_save value so it can
+# be restored when switching back to battery.
+ACTION=="add", SUBSYSTEM=="sound", KERNEL=="card*", DRIVERS=="snd_hda_intel", \
+  TEST!="/run/udev/snd-hda-intel-powersave", \
+  RUN+="/usr/bin/bash -c 'touch /run/udev/snd-hda-intel-powersave; \
+    [[ $$(cat /sys/class/power_supply/BAT0/status 2>/dev/null) != \"Discharging\" ]] && \
+    echo $$(cat /sys/module/snd_hda_intel/parameters/power_save) > /run/udev/snd-hda-intel-powersave && \
+    echo 0 > /sys/module/snd_hda_intel/parameters/power_save'"
+
+# Switching to battery: restore saved power_save value (enables autosuspend)
+SUBSYSTEM=="power_supply", ENV{POWER_SUPPLY_ONLINE}=="0", TEST=="/sys/module/snd_hda_intel", \
+  RUN+="/usr/bin/bash -c 'echo $$(cat /run/udev/snd-hda-intel-powersave 2>/dev/null || echo 1) \
+    > /sys/module/snd_hda_intel/parameters/power_save'"
+
+# Switching to AC: disable power saving (prevents audio cracks)
+SUBSYSTEM=="power_supply", ENV{POWER_SUPPLY_ONLINE}=="1", TEST=="/sys/module/snd_hda_intel", \
+  RUN+="/usr/bin/bash -c '[[ $$(cat /sys/module/snd_hda_intel/parameters/power_save) != 0 ]] && \
+    echo $$(cat /sys/module/snd_hda_intel/parameters/power_save) > /run/udev/snd-hda-intel-powersave; \
+    echo 0 > /sys/module/snd_hda_intel/parameters/power_save'"

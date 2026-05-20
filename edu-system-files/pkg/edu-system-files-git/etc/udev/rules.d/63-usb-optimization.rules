@@ -1,0 +1,5 @@
+# ============================================================================
+# USB Device Optimization - Better latency and stability
+# ============================================================================
+# Optimizes USB devices for responsiveness without sacrificing stability
+# Note: Autosuspend rules removed - these attributes don't exist on all USB devices

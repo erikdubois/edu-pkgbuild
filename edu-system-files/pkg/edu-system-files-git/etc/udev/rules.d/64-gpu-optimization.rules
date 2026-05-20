@@ -1,0 +1,24 @@
+# ============================================================================
+# GPU/Display Optimization - Performance and responsiveness
+# ============================================================================
+# Optimizes graphics hardware for responsiveness and efficiency
+
+# NVIDIA: PCI power/control=auto is intentionally omitted. The proprietary
+# NVIDIA driver manages its own power states; forcing PCI autosuspend via udev
+# causes GPU hangs and black screens on GTX 900/1000 and some RTX cards.
+# Use NVreg_DynamicPowerManagement in modprobe.d/nvidia.conf instead.
+
+# AMD/ATI GPUs: enable dynamic power management
+ACTION=="add", SUBSYSTEM=="pci", ATTRS{vendor}=="0x1002", ATTRS{class}=="0x030000", \
+  ATTR{power/control}="auto"
+
+# Intel iGPU: enable RC6 power saving (modern intel)
+ACTION=="add", SUBSYSTEM=="pci", ATTRS{vendor}=="0x8086", ATTRS{class}=="0x030000", \
+  ATTR{power/control}="auto"
+
+# Displays: prevent accidental power-off
+ACTION=="add", SUBSYSTEM=="drm", RUN+="/bin/bash -c 'echo 0 > /sys/class/drm/*/power/autosuspend_delay_ms 2>/dev/null || true'"
+
+# Backlight: smooth brightness transitions
+ACTION=="add", SUBSYSTEM=="backlight", ATTR{brightness}=="*", \
+  ATTR{max_brightness}=="*", ATTR{type}="raw"

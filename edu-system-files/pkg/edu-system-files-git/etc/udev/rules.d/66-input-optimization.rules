@@ -1,0 +1,16 @@
+# ============================================================================
+# Input Device Optimization
+# ============================================================================
+# Only rules with verifiable sysfs effect are included.
+# Keyboard repeat rate, mouse acceleration, and libinput options must be
+# configured in X11 (xorg.conf.d), Wayland compositor config, or user
+# session scripts — udev has no mechanism to inject these settings.
+
+# Removed rules and reasons:
+# - echo > /proc/sys/kernel/autorepeat_interval: path does not exist
+# - ENV{LIBINPUT_IGNORE_DUPLICATE_EVENT}: not a real libinput udev property
+# - ENV{MOUSE_ACCEL}/ENV{MOUSE_SPEED}: not recognized by X11 or libinput
+# - echo 1000 > /sys/module/usbhid/parameters/jitter: 1000ms jitter buffer
+#   increases lag rather than reducing it, and the path may not exist
+# - udev-hid-autosuspend RUN+ helper: systemd 254+ blocks /usr/local/bin/
+#   callouts with "Permission denied"; default USB autosuspend is fine on desktops
