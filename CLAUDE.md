@@ -71,12 +71,12 @@ bash 3-build-all-edu-themes.sh
 
 ## Package naming conventions
 
-| Prefix | Purpose |
-|---|---|
-| `edu-*` | General EDU project packages |
-| `edu-neo-candy-*` | GTK/icon theme packages |
-| `edu-*-git` | Packages built from a git source |
-| `plymouth-theme-*` | Plymouth boot splash themes |
+| Prefix             | Purpose                          |
+|--------------------|----------------------------------|
+| `edu-*`            | General EDU project packages     |
+| `edu-neo-candy-*`  | GTK/icon theme packages          |
+| `edu-*-git`        | Packages built from a git source |
+| `plymouth-theme-*` | Plymouth boot splash themes      |
 
 ## Bash script standard
 

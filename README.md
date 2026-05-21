@@ -67,12 +67,12 @@ All batch scripts call `~/EDU/nemesis_repo/up.sh` at the end to publish the repo
 
 ## Package categories
 
-| Prefix | Content |
-|---|---|
-| `edu-*` | General EDU project packages (dot files, shells, WM configs, tools) |
-| `edu-neo-candy-*` | GTK and icon themes |
-| `edu-*-git` | Packages built from a git source |
-| `plymouth-theme-*` | Plymouth boot splash themes |
+| Prefix             | Content                                                             |
+|--------------------|---------------------------------------------------------------------|
+| `edu-*`            | General EDU project packages (dot files, shells, WM configs, tools) |
+| `edu-neo-candy-*`  | GTK and icon themes                                                 |
+| `edu-*-git`        | Packages built from a git source                                    |
+| `plymouth-theme-*` | Plymouth boot splash themes                                         |
 
 ---
 
