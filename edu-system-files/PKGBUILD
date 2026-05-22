@@ -5,7 +5,7 @@ _destname1="/etc"
 _destname2="/usr"
 _licensedir="/usr/share/arcolinux/licenses/"
 pkgver=26.05
-pkgrel=51
+pkgrel=53
 pkgdesc="System-wide and user systemfiles (by Erik Dubois)"
 arch=('any')
 url="https://github.com/erikdubois/${_pkgname}"
@@ -21,10 +21,10 @@ package() {
 	install -m644 "${srcdir}/${_pkgname}/LICENSE" "${pkgdir}${_licensedir}${_pkgname}/LICENSE"
 	
 	install -dm755 "${pkgdir}${_destname1}"
-	cp -r "${srcdir}/${_pkgname}/${_destname1}/." "${pkgdir}${_destname1}/"
+	cp -a "${srcdir}/${_pkgname}/${_destname1}/." "${pkgdir}${_destname1}/"
 	chmod 750 "${pkgdir}${_destname1}/sudoers.d"
-	
+
 	install -dm755 "${pkgdir}${_destname2}"
-	cp -r "${srcdir}/${_pkgname}/${_destname2}/." "${pkgdir}${_destname2}/"
+	cp -a "${srcdir}/${_pkgname}/${_destname2}/." "${pkgdir}${_destname2}/"
 
 }
