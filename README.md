@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="kiro.jpg" alt="Kiro" width="220" />
+</p>
+
 # edu-pkgbuild
 
 A collection of Arch Linux PKGBUILDs used to build and publish packages for the **nemesis_repo** — the custom package repository powering the EDU/Kiro Linux ecosystem.
