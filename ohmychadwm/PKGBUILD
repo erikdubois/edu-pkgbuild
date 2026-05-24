@@ -8,7 +8,7 @@ _destname2="/etc/skel/.bin/"
 _destname5="/usr/"
 _licensedir="/usr/share/edu/licenses/"
 pkgver=26.05
-pkgrel=13
+pkgrel=21
 pkgdesc="Configuration files"
 arch=('any')
 url="https://github.com/erikdubois/ohmychadwm"
@@ -60,6 +60,9 @@ package() {
 
   cd "$srcdir/$_pkgname/etc/skel/.config/ohmychadwm/chadwm"
   make PREFIX=/usr DESTDIR="$pkgdir" install
+
+  # Strip build artifacts so they don't ship under /etc/skel/
+  rm -f *.o ohmychadwm config.h
 
 	install -dm755 ${pkgdir}${_licensedir}${_pkgname}
 	install -m644  ${srcdir}/${_pkgname}/LICENSE ${pkgdir}${_licensedir}${_pkgname}
