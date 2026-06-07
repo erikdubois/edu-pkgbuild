@@ -3,7 +3,7 @@ pkgname=kiro-iso-builder
 _pkgname=kiro-iso-builder
 _licensedir="/usr/share/kiro/licenses/"
 pkgver=26.06
-pkgrel=15
+pkgrel=16
 pkgdesc="GTK4 front-end for building the Kiro ISO, with one-click host pre-flight fixes"
 arch=('any')
 url="https://github.com/kirodubes/${_pkgname}"
@@ -35,12 +35,16 @@ package() {
 		"${_pkgname}" > "${pkgdir}/usr/bin/${_pkgname}"
 	chmod +x "${pkgdir}/usr/bin/${_pkgname}"
 
-	# Desktop entry + icon. The .desktop uses Icon=builder, so install the
-	# scalable icon as 'builder' in the hicolor theme for Icon= to resolve.
+	# Desktop entry + icon. The .desktop uses Icon=builder. Install the scalable
+	# icon as 'builder' in the hicolor theme AND in /usr/share/pixmaps — the
+	# latter is the theme-independent fallback the icon lookup always checks, so
+	# the icon still resolves on systems without our icon themes installed.
 	install -Dm644 "${_src}/kiro-iso-builder.desktop" \
 		"${pkgdir}/usr/share/applications/${_pkgname}.desktop"
 	install -Dm644 "${_src}/builder.svg" \
 		"${pkgdir}/usr/share/icons/hicolor/scalable/apps/builder.svg"
+	install -Dm644 "${_src}/builder.svg" \
+		"${pkgdir}/usr/share/pixmaps/builder.svg"
 
 	# License (Kiro convention).
 	install -Dm644 "${_src}/LICENSE" "${pkgdir}${_licensedir}${_pkgname}/LICENSE"
