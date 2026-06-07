@@ -1,0 +1,47 @@
+# Maintainer: Erik Dubois <erik.dubois@gmail.com>
+pkgname=kiro-iso-builder
+_pkgname=kiro-iso-builder
+_licensedir="/usr/share/kiro/licenses/"
+pkgver=26.06
+pkgrel=15
+pkgdesc="GTK4 front-end for building the Kiro ISO, with one-click host pre-flight fixes"
+arch=('any')
+url="https://github.com/kirodubes/${_pkgname}"
+license=('GPL3')
+makedepends=('git')
+depends=('python-gobject' 'gtk4' 'polkit' 'git')
+optdepends=('qemu-desktop: boot the built ISO in a VM from the Done screen'
+            'polkit-gnome: a polkit authentication agent (or your desktop'\''s own)')
+options=(!strip !emptydirs)
+install='readme.install'
+source=(${_pkgname}::"git+$url")
+sha256sums=('SKIP')
+
+package() {
+	local _src="${srcdir}/${_pkgname}"
+	local _appdir="${pkgdir}/usr/share/${_pkgname}"
+
+	# Application code — flat Python modules + CSS into /usr/share/kiro-iso-builder.
+	# Python adds the script's own dir to sys.path[0], so the sibling imports
+	# (functions, host_checks, *_gui) resolve when run from here.
+	install -dm755 "${_appdir}"
+	install -m644 "${_src}"/*.py "${_appdir}/"
+	install -m644 "${_src}/style.css" "${_appdir}/"
+	chmod +x "${_appdir}/kiro-iso-builder.py"
+
+	# Launcher on PATH (matches Exec= in the .desktop).
+	install -dm755 "${pkgdir}/usr/bin"
+	printf '#!/bin/bash\nexec python3 /usr/share/%s/kiro-iso-builder.py "$@"\n' \
+		"${_pkgname}" > "${pkgdir}/usr/bin/${_pkgname}"
+	chmod +x "${pkgdir}/usr/bin/${_pkgname}"
+
+	# Desktop entry + icon. The .desktop uses Icon=builder, so install the
+	# scalable icon as 'builder' in the hicolor theme for Icon= to resolve.
+	install -Dm644 "${_src}/kiro-iso-builder.desktop" \
+		"${pkgdir}/usr/share/applications/${_pkgname}.desktop"
+	install -Dm644 "${_src}/builder.svg" \
+		"${pkgdir}/usr/share/icons/hicolor/scalable/apps/builder.svg"
+
+	# License (Kiro convention).
+	install -Dm644 "${_src}/LICENSE" "${pkgdir}${_licensedir}${_pkgname}/LICENSE"
+}
