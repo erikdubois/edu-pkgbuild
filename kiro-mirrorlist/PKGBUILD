@@ -1,0 +1,15 @@
+# Maintainer: Erik Dubois <erik.dubois@gmail.com>
+pkgname=kiro-mirrorlist
+pkgver=20260613
+pkgrel=1
+pkgdesc="Kiro repository mirrorlist — Server entries for nemesis_repo"
+arch=('any')
+url="https://kiroproject.be"
+license=('GPL3')
+backup=('etc/pacman.d/kiro-mirrorlist')
+source=('kiro-mirrorlist')
+sha256sums=('677107073c77a3c7b1ab25047436502c01cbfb054c60a73e807cb2faeacbbe18')
+
+package() {
+	install -Dm644 "${srcdir}/kiro-mirrorlist" "${pkgdir}/etc/pacman.d/kiro-mirrorlist"
+}

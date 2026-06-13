@@ -1,0 +1,12 @@
+##
+## Kiro repository mirrorlist
+##
+## Serves the nemesis_repo packages. Referenced from /etc/pacman.conf via:
+##
+##   [nemesis_repo]
+##   Include = /etc/pacman.d/kiro-mirrorlist
+##
+## $repo expands to nemesis_repo, $arch to the system architecture.
+##
+
+Server = https://erikdubois.github.io/$repo/$arch
