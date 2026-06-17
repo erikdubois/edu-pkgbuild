@@ -2,7 +2,7 @@
 
 pkgname=plymouth-theme-kiro-logo-nemesis
 pkgver=26.06
-pkgrel=09
+pkgrel=11
 pkgdesc="Kiro Linux self-assembling logo boot splash theme for Plymouth"
 arch=('any')
 url="https://github.com/kirodubes/plymouth-theme-kiro-logo-nemesis"
