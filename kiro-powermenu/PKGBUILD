@@ -1,0 +1,30 @@
+# Maintainer: Erik Dubois <erik.dubois@gmail.com>
+pkgname=kiro-powermenu
+_destname1="/usr"
+_destname2="/etc"
+_licensedir="/usr/share/kiro/licenses/"
+pkgver=26.06
+pkgrel=100
+pkgdesc="Power menu (by Erik Dubois)"
+arch=('any')
+url="https://github.com/kirodubes/kiro-powermenu"
+license=('GPL3')
+conflicts=('edu-powermenu-git')
+replaces=('edu-powermenu-git')
+depends=('bash')
+makedepends=('git')
+options=(!strip !emptydirs)
+source=("${pkgname}::git+${url}.git")
+sha256sums=('SKIP')
+
+package() {
+	install -dm755 "${pkgdir}${_licensedir}${pkgname}"
+	install -m644 "${srcdir}/${pkgname}/LICENSE" "${pkgdir}${_licensedir}${pkgname}/LICENSE"
+	
+	install -dm755 "${pkgdir}${_destname1}"
+	cp -r "${srcdir}/${pkgname}/${_destname1}/." "${pkgdir}${_destname1}/"
+	
+	install -dm755 "${pkgdir}${_destname2}"
+	cp -r "${srcdir}/${pkgname}${_destname2}/." "${pkgdir}${_destname2}/"
+
+}

@@ -1,0 +1,21 @@
+# Maintainer: Erik Dubois <erik.dubois@gmail.com>
+pkgname=kiro-neo-candy-arc
+pkgver=26.06
+pkgrel=100
+_destname1="/usr/share/icons/"
+pkgdesc="Beautyline icons completed for ArcoLinux + Candy icons + Arc icons"
+arch=('any')
+url="https://github.com/kirodubes/kiro-neo-candy-arc.git"
+license=('GPL3')
+depends=('neo-candy-icons-git')
+replaces=('edu-neo-candy-arc-git')
+makedepends=('git')
+provides=("${pkgname}")
+conflicts=('edu-neo-candy-arc-git')
+options=(!strip !emptydirs)
+source=(${pkgname}::"git+${url}")
+sha256sums=('SKIP')
+package() {
+	install -dm 755 ${pkgdir}${_destname1}
+    cp -r ${srcdir}/${pkgname}${_destname1}/* ${pkgdir}${_destname1}
+}

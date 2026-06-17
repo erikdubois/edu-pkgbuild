@@ -1,0 +1,26 @@
+# Maintainer: Erik Dubois <erik.dubois@gmail.com>
+pkgname=alacritty-tweak-tool
+_pkgname=alacritty-tweak-tool
+_destname1="/usr"
+_licensedir="/usr/share/kiro/licenses/"
+pkgver=26.06
+pkgrel=100
+pkgdesc="Alacritty Tweak Tool or ATT"
+arch=('x86_64')
+url="https://github.com/kirodubes/${_pkgname}"
+replaces=('alacritty-tweak-tool-git')
+conflicts=('alacritty-tweak-tool-git')
+license=('GPL3')
+depends=('alacritty' 'fastfetch' 'python-gobject' 'python-tomlkit' 'vte4' 'fontconfig' 'imagemagick')
+optdepends=('feh: read current wallpaper from ~/.fehbg'
+            'variety: read current wallpaper from Variety')
+makedepends=('git')
+options=(!strip !emptydirs)
+source=("${_pkgname}::git+${url}")
+sha256sums=('SKIP')
+install='readme.install'
+package() {
+	install -dm755 "${pkgdir}${_licensedir}${_pkgname}"
+	install -m644 "${srcdir}/${_pkgname}/LICENSE" "${pkgdir}${_licensedir}${_pkgname}/LICENSE"
+	cp -r "${srcdir}/${_pkgname}/${_destname1}" "${pkgdir}"
+}

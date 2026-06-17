@@ -1,9 +1,9 @@
 # Maintainer: Erik Dubois <erik.dubois@gmail.com>
 
 pkgname=plymouth-theme-kiro
-pkgver=26.05
-pkgrel=03
-pkgdesc="Star Trek Starfleet boot splash theme for Plymouth"
+pkgver=26.06
+pkgrel=100
+pkgdesc="Kiro Linux boot splash theme for Plymouth"
 arch=('any')
 url="https://github.com/erikdubois/plymouth-theme-kiro"
 license=('MIT')

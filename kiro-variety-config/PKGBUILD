@@ -1,0 +1,29 @@
+# Maintainer: Erik Dubois <erik.dubois@gmail.com>
+pkgname=kiro-variety-config
+_destname1="/etc/skel/.config/variety/"
+_licensedir="/usr/share/kiro/licenses/"
+pkgver=26.06
+pkgrel=100
+pkgdesc="variety config for edu"
+arch=('any')
+url="https://github.com/kirodubes/kiro-variety-config"
+license=('GPL3')
+conflicts=('edu-variety-config-git')
+makedepends=('git')
+depends=('feh')
+optdepends=('variety')
+replaces=('arcolinux-variety-git' 'edu-variety-config-git')
+provides=("${pkgname}")
+options=(!strip !emptydirs)
+source=(${pkgname}::"git+https://github.com/kirodubes/kiro-variety-config.git")
+sha256sums=('SKIP')
+install='readme.install'
+package() {
+	install -dm755 ${pkgdir}${_licensedir}${pkgname}
+	install -m644  ${srcdir}/${pkgname}/LICENSE ${pkgdir}${_licensedir}${pkgname}
+
+	install -dm755 ${pkgdir}${_destname1}
+	cp -r  ${srcdir}/${pkgname}${_destname1}* ${pkgdir}${_destname1}
+	cp -r  ${srcdir}/${pkgname}${_destname1}.firstrun ${pkgdir}${_destname1}
+	cp -r  ${srcdir}/${pkgname}${_destname1}.last_change_time ${pkgdir}${_destname1}
+}

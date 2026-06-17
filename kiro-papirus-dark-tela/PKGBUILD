@@ -1,0 +1,21 @@
+# Maintainer: Erik Dubois <erik.dubois@gmail.com>
+pkgname=kiro-papirus-dark-tela
+pkgver=26.06
+pkgrel=100
+_destname1="/usr/share/icons/"
+pkgdesc="Papirus dark icons with Tela folders"
+arch=('any')
+url="https://github.com/kirodubes/kiro-papirus-dark-tela.git"
+license=('GPL3')
+depends=('papirus-icon-theme')
+makedepends=('git')
+replaces=('edu-papirus-dark-tela-git')
+provides=("${pkgname}")
+conflicts=('edu-papirus-dark-tela-git')
+options=(!strip !emptydirs)
+source=(${pkgname}::"git+${url}")
+sha256sums=('SKIP')
+package() {
+	install -dm 755 ${pkgdir}${_destname1}
+    cp -r ${srcdir}/${pkgname}${_destname1}/* ${pkgdir}${_destname1}
+}

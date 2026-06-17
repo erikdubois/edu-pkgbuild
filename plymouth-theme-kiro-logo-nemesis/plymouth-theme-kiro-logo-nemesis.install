@@ -1,0 +1,11 @@
+post_install() {
+    plymouth-set-default-theme kiro-logo
+}
+
+post_upgrade() {
+    plymouth-set-default-theme kiro-logo
+}
+
+pre_remove() {
+    plymouth-set-default-theme details
+}

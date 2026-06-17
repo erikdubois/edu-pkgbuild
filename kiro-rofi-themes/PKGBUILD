@@ -1,0 +1,25 @@
+# Maintainer: Erik Dubois <erik.dubois@gmail.com>
+pkgname=kiro-rofi-themes
+_destname1="/usr/share/rofi/themes/"
+_licensedir="/usr/share/kiro/licenses/"
+pkgver=26.06
+pkgrel=100
+pkgdesc="Rofi themes created for edu"
+arch=('any')
+url="https://github.com/kirodubes/kiro-rofi-themes"
+license=('GPL3')
+replaces=('edu-rofi-themes-git')
+makedepends=('git')
+depends=()
+conflicts=("arcolinux-rofi-themes-git" 'edu-rofi-themes-git')
+provides=("${pkgname}")
+options=(!strip !emptydirs)
+source=(${pkgname}::"git+https://github.com/kirodubes/kiro-rofi-themes.git")
+sha256sums=('SKIP')
+package() {
+	install -dm755 ${pkgdir}${_licensedir}${pkgname}
+	install -m644  ${srcdir}/${pkgname}/LICENSE ${pkgdir}${_licensedir}${pkgname}
+
+	install -dm755 ${pkgdir}${_destname1}
+	install -m644  ${srcdir}/${pkgname}${_destname1}* ${pkgdir}${_destname1}
+}

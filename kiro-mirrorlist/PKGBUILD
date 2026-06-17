@@ -1,7 +1,7 @@
 # Maintainer: Erik Dubois <erik.dubois@gmail.com>
 pkgname=kiro-mirrorlist
-pkgver=20260613
-pkgrel=1
+pkgver=26.06
+pkgrel=100
 pkgdesc="Kiro repository mirrorlist — Server entries for nemesis_repo"
 arch=('any')
 url="https://kiroproject.be"

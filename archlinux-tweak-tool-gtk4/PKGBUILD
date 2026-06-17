@@ -1,0 +1,50 @@
+# Maintainer: Erik Dubois <erik.dubois@gmail.com>
+pkgname=archlinux-tweak-tool-gtk4
+_pkgname=archlinux-tweak-tool-gtk4
+_destname1="/usr"
+_licensedir="/usr/share/kiro/licenses/"
+pkgver=26.06
+pkgrel=100
+pkgdesc="Arch Linux Tweak Tool or ATT"
+arch=('x86_64')
+url="https://github.com/kirodubes/${_pkgname}"
+license=('GPL3')
+depends=('alacritty' 'bat' 'feh' 'fzf' 'xorg-xauth' 'python-gobject' 'python-tomlkit' 'vte3' 'polkit-gnome' 'python-distro' 'python-psutil')
+optdepends=('alacritty: terminal for install/remove operations'
+            'alacritty-themes: themes for alacritty terminal'
+            'reflector: rank Arch mirrors by speed (Maintenance tab)'
+            'rate-mirrors: alternative mirror ranking tool (Maintenance tab)'
+            'hblock: block ads via hosts file (Maintenance tab)'
+            'fastfetch: system information display (Fastfetch tab)'
+            'chaotic-mirrorlist: Chaotic-AUR mirror list'
+            'chaotic-keyring: Chaotic-AUR keyring'
+            'sddm: login display manager (SDDM tab)'
+            'inxi: system information viewer (System tab)'
+            'hwinfo: hardware information tool (System tab)'
+            'gparted: graphical partition editor (System tab)'
+            'partitionmanager: KDE partition manager (System tab)'
+            'tuned: adaptive system tuning daemon (Performance tab)'
+            'irqbalance: optimize IRQ distribution (Performance tab)'
+            'ananicy-cpp: process priority manager (Performance tab)'
+            'gamemode: gaming performance optimizer (Performance tab)'
+            'fish: friendly interactive shell (Shell tab)'
+            'zsh: Z shell (Shell tab)'
+            'bat: syntax-highlighted cat replacement (Shell extras)'
+            'fzf: fuzzy finder (Shell extras)'
+            'bluez: bluetooth stack (Services tab)'
+            'bluez-utils: bluetooth utilities (Services tab)'
+            'samba: Windows file sharing (Services tab)'
+            'cups: printing system (Services tab)'
+            'pipewire: modern audio system (Services tab)')
+makedepends=('git')
+options=(!strip !emptydirs)
+replaces=(archlinux-tweak-tool-gtk4-git arcolinux-tweak-tool-git)
+conflicts=('archlinux-tweak-tool-gtk4-git' 'archlinux-tweak-tool-git' 'arcolinux-tweak-tool-git' 'arcolinux-tweak-tool-dev-git' 'archlinux-tweak-tool-dev-git')
+source=("${_pkgname}::git+${url}")
+sha256sums=('SKIP')
+install='readme.install'
+package() {
+	install -dm755 "${pkgdir}${_licensedir}${_pkgname}"
+	install -m644 "${srcdir}/${_pkgname}/LICENSE" "${pkgdir}${_licensedir}${_pkgname}/LICENSE"
+	cp -r "${srcdir}/${_pkgname}/${_destname1}" "${pkgdir}"
+}

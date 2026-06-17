@@ -1,0 +1,25 @@
+# Maintainer: Erik Dubois <erik.dubois@gmail.com>
+pkgname=kiro-arc-dawn
+_destname1="/usr/share/themes/"
+_licensedir="/usr/share/kiro/licenses/"
+pkgver=26.06
+pkgrel=100
+pkgdesc="Arc themes created for edu"
+arch=('any')
+url="https://github.com/kirodubes/kiro-arc-dawn"
+license=('GPL3')
+conflicts=('edu-arc-dawn-git')
+makedepends=('git')
+depends=()
+replaces=('edu-arc-dawn-git')
+provides=("${pkgname}")
+options=(!strip !emptydirs)
+source=(${pkgname}::"git+https://github.com/kirodubes/kiro-arc-dawn.git")
+sha256sums=('SKIP')
+package() {
+	install -dm755 ${pkgdir}${_licensedir}${pkgname}
+	install -m644  ${srcdir}/${pkgname}/LICENSE ${pkgdir}${_licensedir}${pkgname}
+
+	install -dm755 ${pkgdir}${_destname1}
+	cp -r  ${srcdir}/${pkgname}${_destname1}* ${pkgdir}${_destname1}
+}

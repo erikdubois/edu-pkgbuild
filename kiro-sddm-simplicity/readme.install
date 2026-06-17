@@ -1,0 +1,81 @@
+set -euo pipefail
+
+GREEN=$(tput setaf 2 2>/dev/null || true)
+YELLOW=$(tput setaf 3 2>/dev/null || true)
+RESET=$(tput sgr0 2>/dev/null || true)
+
+_info() { echo "${GREEN}${*}${RESET}"; }
+_warn() { echo "${YELLOW}${*}${RESET}"; }
+
+_find_conf() {
+    if [ -f /etc/sddm.conf.d/kde_settings.conf ]; then
+        echo /etc/sddm.conf.d/kde_settings.conf
+    elif [ -f /etc/sddm.conf ]; then
+        echo /etc/sddm.conf
+    fi
+}
+
+_set_key() {
+    local file="$1" key="$2" value="$3"
+    if grep -q "^${key}=" "$file"; then
+        sed -i "/^${key}=/c ${key}=${value}" "$file"
+    else
+        echo "${key}=${value}" >> "$file"
+    fi
+}
+
+post_install() {
+    local conf
+    conf=$(_find_conf)
+
+    if [ -z "$conf" ]; then
+        # No admin SDDM config exists yet — only the package default in
+        # /usr/lib/sddm/sddm.conf.d/ (which we must never edit: an sddm upgrade
+        # would clobber it). Create /etc/sddm.conf — the file that wins SDDM's
+        # precedence order — with a [General] section so Current and the
+        # InputMethod below actually bind and the OSK engages on a fresh system.
+        conf=/etc/sddm.conf
+        _info "No admin SDDM config found — creating ${conf}"
+        printf '[General]\n' > "$conf"
+    fi
+
+    echo
+    _info "Configuring SDDM in ${conf}"
+    _set_key "$conf" "Current" "edu-simplicity"
+    _set_key "$conf" "DisplayServer" "x11"
+    # InputMethod must live in /etc/sddm.conf — per sddm.conf(5) (confirmed on
+    # hardware) that file outranks any sddm.conf.d/ drop-in, and it ships with an
+    # empty InputMethod= that would otherwise clobber a drop-in value.
+    local maincfg=/etc/sddm.conf
+    [ -f "$maincfg" ] || maincfg="$conf"
+    _set_key "$maincfg" "InputMethod" "qtvirtualkeyboard"
+    _info "Theme edu-simplicity; DisplayServer x11; InputMethod qtvirtualkeyboard (${maincfg})"
+    echo
+}
+
+post_upgrade() {
+    post_install
+}
+
+post_remove() {
+    local conf
+    conf=$(_find_conf)
+
+    if [ -z "$conf" ]; then
+        echo
+        _warn "No SDDM config file found — nothing to clear"
+        echo
+        return
+    fi
+
+    echo
+    _info "Clearing SDDM theme in ${conf}"
+    _set_key "$conf" "Current" ""
+    # Blank InputMethod again so a leftover qtvirtualkeyboard can't break another
+    # theme's greeter once this package (and its qt5-virtualkeyboard dep) is gone.
+    local maincfg=/etc/sddm.conf
+    [ -f "$maincfg" ] || maincfg="$conf"
+    _set_key "$maincfg" "InputMethod" ""
+    _info "Theme cleared; InputMethod blanked in ${maincfg}"
+    echo
+}

@@ -1,0 +1,23 @@
+# Maintainer: Erik Dubois <erik.dubois@gmail.com>
+pkgname=kiro-sddm-simplicity-qt6
+_destname1="/usr"
+_licensedir="/usr/share/kiro/licenses/"
+pkgver=26.06
+pkgrel=100
+pkgdesc="Simplicity theme from isseigx on gitlab"
+arch=('any')
+url="https://github.com/kirodubes/kiro-sddm-simplicity-qt6"
+license=('GPL3')
+conflicts=('edu-sddm-simplicity-git' 'edu-sddm-simplicity-qt6-git')
+makedepends=('git')
+depends=('qt6-declarative')
+install=readme.install
+options=(!strip !emptydirs)
+replaces=('edu-sddm-simplicity-qt6-git')
+source=(${pkgname}::git+$url)
+sha256sums=('SKIP')
+package() {
+  install -dm755 ${pkgdir}${_licensedir}${pkgname}
+  install -m644  ${srcdir}/${pkgname}/LICENSE ${pkgdir}${_licensedir}${pkgname}
+  cp -r ${srcdir}/${pkgname}/${_destname1} ${pkgdir}
+}

@@ -1,0 +1,34 @@
+# Maintainer (Kiro/nemesis_repo): Erik Dubois <erik.dubois@gmail.com>
+# Upstream: https://github.com/PapirusDevelopmentTeam/arc-kde
+# Kiro source (fork): https://github.com/kirodubes/kiro-arc-kde
+pkgname=kiro-arc-kde
+pkgver=26.06
+pkgrel=100
+pkgdesc="Arc theme for KDE Plasma (Kiro fork, latest master from kirodubes)"
+arch=('any')
+url="https://github.com/kirodubes/kiro-arc-kde"
+license=('GPL3')
+makedepends=('git')
+optdepends=(
+	'arc-gtk-theme: for a consistent look in GTK applications'
+	'konsole: for konsole theme'
+	'konversation: for konversation theme'
+	'kvantum: for kvantum theme (recommended)'
+	'papirus-icon-theme: for a more consistent and beautiful experience (recommended)'
+	'plasma-desktop: for plasma desktop theme'
+	'yakuake: for yakuake theme'
+)
+provides=('arc-kde' 'kvantum-theme-arc')
+conflicts=('edu-arc-kde' 'arc-kde' 'arc-kde-git' 'kvantum-theme-arc')
+replaces=('edu-arc-kde' 'arc-kde' 'arc-kde-git' 'kvantum-theme-arc')
+source=("$pkgname::git+$url.git")
+b2sums=('SKIP')
+
+prepare() {
+	rm -r "$pkgname"/konversation/themes/papirus{,-dark}/src
+}
+
+package() {
+	# shellcheck disable=SC2154
+	make -C "$pkgname" DESTDIR="$pkgdir" install
+}

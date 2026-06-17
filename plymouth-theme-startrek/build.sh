@@ -108,7 +108,11 @@ bump_version() {
 
     local source_line
     source_line=$(grep -E '^\s*source=' "${pkgbuild}" || true)
-    if echo "${source_line}" | grep -qE '\$\{?pkgver\}?|\$\{?pkgrel\}?'; then
+    # git+ sources pull fresh upstream each build, so always bump them — the
+    # pkgver/pkgrel only name the clone dir, they are not part of a download URL.
+    # Only a non-git source that embeds the version must be bumped by hand.
+    if echo "${source_line}" | grep -qE '\$\{?pkgver\}?|\$\{?pkgrel\}?' \
+        && ! echo "${source_line}" | grep -qE 'git\+'; then
         log_warn "Source URL embeds pkgver/pkgrel — skipping auto-bump for '${pkgname}'. Set version manually when a new upstream release is published."
         return 0
     fi

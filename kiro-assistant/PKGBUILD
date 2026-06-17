@@ -1,0 +1,32 @@
+# Maintainer: Erik Dubois <erik.dubois@gmail.com>
+pkgname=kiro-assistant
+_pkgname=kiro-assistant
+_licensedir="/usr/share/kiro/licenses/"
+pkgver=26.06
+pkgrel=100
+pkgdesc="Kiro Assistant — Claude Code knowledge pack for the Kiro distro (BYO-key)"
+arch=('any')
+url="https://github.com/kirodubes/${_pkgname}"
+license=('GPL3')
+makedepends=('git')
+depends=('claude-code')
+optdepends=()
+provides=("${pkgname}")
+options=(!strip !emptydirs)
+source=(${_pkgname}::"git+$url")
+sha256sums=('SKIP')
+install='readme.install'
+
+package() {
+	# Launcher + .desktop (shipped under usr/ in the source repo)
+	cp -r "${srcdir}/${_pkgname}/usr" "${pkgdir}/"
+
+	# Knowledge pack
+	install -dm755 "${pkgdir}/usr/share/${_pkgname}"
+	cp -r "${srcdir}/${_pkgname}/CLAUDE.md" "${srcdir}/${_pkgname}/README.md" \
+		"${srcdir}/${_pkgname}/knowledge" "${pkgdir}/usr/share/${_pkgname}/"
+
+	# License
+	install -dm755 "${pkgdir}${_licensedir}${_pkgname}"
+	install -m644 "${srcdir}/${_pkgname}/LICENSE" "${pkgdir}${_licensedir}${_pkgname}/LICENSE"
+}

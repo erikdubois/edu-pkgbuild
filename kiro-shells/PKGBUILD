@@ -1,0 +1,22 @@
+# Maintainer: Erik Dubois <erik.dubois@gmail.com>
+pkgname=kiro-shells
+_destname1="/etc/skel/"
+pkgver=26.06
+pkgrel=100
+pkgdesc="configs for bash, zsh and fish"
+arch=('any')
+url="https://github.com/kirodubes/kiro-shells"
+license=('GPL3')
+conflicts=('edu-shells-git' 'cachyos-fish-config')
+replaces=('edu-shells-git')
+makedepends=('git' 'most')
+depends=('bash')
+provides=("${pkgname}")
+options=(!strip !emptydirs)
+source=(${pkgname}::"git+https://github.com/kirodubes/kiro-shells.git")
+sha256sums=('SKIP')
+install='readme.install'
+package() {
+    install -dm755 "${pkgdir}${_destname1}"
+    cp -a "${srcdir}/${pkgname}${_destname1}".* "${pkgdir}${_destname1}"
+}

@@ -1,0 +1,16 @@
+post_upgrade() {
+    if usr/bin/pacman-key -l >/dev/null 2>&1; then
+        usr/bin/pacman-key --populate kiro
+        usr/bin/pacman-key --updatedb
+    fi
+}
+
+post_install() {
+    post_upgrade
+}
+
+pre_remove() {
+    if usr/bin/pacman-key -l >/dev/null 2>&1; then
+        usr/bin/pacman-key --delete 149ABD0C3A0563EE 2>/dev/null || true
+    fi
+}

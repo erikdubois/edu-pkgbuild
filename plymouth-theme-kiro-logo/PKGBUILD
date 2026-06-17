@@ -1,0 +1,25 @@
+# Maintainer: Erik Dubois <erik.dubois@gmail.com>
+
+pkgname=plymouth-theme-kiro-logo
+pkgver=26.06
+pkgrel=100
+pkgdesc="Kiro Linux self-assembling logo boot splash theme for Plymouth"
+arch=('any')
+url="https://github.com/kirodubes/plymouth-theme-kiro-logo"
+license=('MIT')
+depends=('plymouth')
+install="${pkgname}.install"
+source=("git+${url}.git")
+sha256sums=('SKIP')
+
+package() {
+    cd "${srcdir}/plymouth-theme-kiro-logo"
+    install -d "${pkgdir}/usr/share/plymouth/themes/kiro-logo"
+    install -m644 usr/share/plymouth/themes/kiro-logo/logo-body.png \
+        usr/share/plymouth/themes/kiro-logo/logo-wedge.png \
+        "${pkgdir}/usr/share/plymouth/themes/kiro-logo/"
+    install -m644 usr/share/plymouth/themes/kiro-logo/kiro-logo.plymouth \
+        "${pkgdir}/usr/share/plymouth/themes/kiro-logo/"
+    install -m644 usr/share/plymouth/themes/kiro-logo/kiro-logo.script \
+        "${pkgdir}/usr/share/plymouth/themes/kiro-logo/"
+}

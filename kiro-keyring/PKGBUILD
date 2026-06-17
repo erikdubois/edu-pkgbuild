@@ -1,0 +1,23 @@
+# Maintainer: Erik Dubois <erik.dubois@gmail.com>
+pkgname=kiro-keyring
+pkgver=26.06
+pkgrel=100
+epoch=1
+pkgdesc="Kiro PGP keyring — trusts the key that signs nemesis_repo packages"
+arch=('any')
+url="https://kiroproject.be"
+license=('GPL3')
+install="${pkgname}.install"
+source=('kiro.gpg'
+        'kiro-trusted'
+        'kiro-revoked')
+sha256sums=('73164f2a14e03d3b0bb9da5b7d924bc6e15f3b30d8002ec09057bf9979b6d565'
+            '0a04fde8f906126795e6ab40137c44276dbf3df1ad43b98b23149325b4e148f9'
+            'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855')
+
+package() {
+	install -dm755 "${pkgdir}/usr/share/pacman/keyrings"
+	install -m644 "${srcdir}/kiro.gpg"     "${pkgdir}/usr/share/pacman/keyrings/kiro.gpg"
+	install -m644 "${srcdir}/kiro-trusted" "${pkgdir}/usr/share/pacman/keyrings/kiro-trusted"
+	install -m644 "${srcdir}/kiro-revoked" "${pkgdir}/usr/share/pacman/keyrings/kiro-revoked"
+}

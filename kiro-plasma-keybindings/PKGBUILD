@@ -1,0 +1,25 @@
+# Maintainer: Erik Dubois <erik.dubois@gmail.com>
+pkgname=kiro-plasma-keybindings
+_destname="/etc"
+_licensedir="/usr/share/kiro/licenses/"
+pkgver=26.06
+pkgrel=100
+pkgdesc="Kservice files for edu"
+arch=('any')
+url="https://github.com/kirodubes/kiro-plasma-keybindings"
+license=('GPL3')
+replaces=('edu-plasma-keybindings-git')
+makedepends=('git')
+conflicts=('edu-plasma-keybindings-git')
+depends=()
+provides=("${pkgname}")
+options=(!strip !emptydirs)
+source=(${pkgname}::"git+https://github.com/kirodubes/kiro-plasma-keybindings.git")
+sha256sums=('SKIP')
+install='readme.install'
+package() {
+	install -dm755 ${pkgdir}${_licensedir}${pkgname}
+	install -m644  ${srcdir}/${pkgname}/LICENSE ${pkgdir}${_licensedir}${pkgname}
+
+	cp -r  ${srcdir}/${pkgname}${_destname} ${pkgdir}${_destname}
+}

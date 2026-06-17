@@ -1,0 +1,27 @@
+# Maintainer: Erik Dubois <erik.dubois@gmail.com>
+
+pkgname=kiro-bootloader-grub-nemesis
+pkgver=26.06
+pkgrel=100
+pkgdesc="Pacman hooks that re-run grub-install + grub-mkconfig so a grub/kernel upgrade can never brick boot (BIOS disk auto-detected)"
+arch=('any')
+url="https://github.com/kirodubes/${pkgname}"
+license=('GPL3')
+makedepends=('git')
+depends=('grub')
+conflicts=('kiro-bootloader-grub')
+provides=("${pkgname}")
+options=(!strip !emptydirs)
+source=("git+${url}.git")
+sha256sums=('SKIP')
+install='readme.install'
+
+package() {
+    cd "${srcdir}/${pkgname}"
+    install -Dm755 usr/bin/kiro-grub-is-active "${pkgdir}/usr/bin/kiro-grub-is-active"
+    install -Dm755 usr/bin/kiro-grub-install "${pkgdir}/usr/bin/kiro-grub-install"
+    install -Dm644 etc/pacman.d/hooks/kiro-grub-install.hook \
+        "${pkgdir}/usr/share/libalpm/hooks/kiro-grub-install.hook"
+    install -Dm644 etc/pacman.d/hooks/kiro-grub-mkconfig.hook \
+        "${pkgdir}/usr/share/libalpm/hooks/kiro-grub-mkconfig.hook"
+}

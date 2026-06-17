@@ -8,10 +8,12 @@ _destname2="/etc/skel/.bin/"
 _destname5="/usr/"
 _licensedir="/usr/share/edu/licenses/"
 pkgver=26.06
-pkgrel=31
+pkgrel=100
 pkgdesc="Configuration files"
 arch=('any')
-url="https://github.com/erikdubois/ohmychadwm"
+url="https://github.com/kirodubes/ohmychadwm"
+replaces=('ohmychadwm-git')
+conflicts=("ohmychadwm-git")
 license=('GPL3')
 makedepends=(
 	'imlib2'
@@ -19,12 +21,13 @@ makedepends=(
 	'gcc'
 )
 depends=(
+	'kiro-keybindings'
 	'acpi'
 	'alacritty'
 	'btop'
 	'dmenu'
-	'edu-rofi-git'
-	'edu-rofi-themes-git'
+	'kiro-rofi'
+	'kiro-rofi-themes'
 	'feh'
 	'gcc'
 	'git'
@@ -34,6 +37,7 @@ depends=(
 	'rofi'
 	'slock'
 	'sxhkd'
+	'thunar'
 	'ttf-jetbrains-mono-nerd'
 	'noto-fonts-cjk'
 	'wget'
@@ -45,9 +49,8 @@ depends=(
 optdepends=(
   'fastcompmgr-git: compositor for transparency and effects'
 )
-provides=("${pkgname}")
 options=(!strip !emptydirs)
-source=(${_pkgname}::"git+https://github.com/erikdubois/${_pkgname}.git")
+source=(${_pkgname}::"git+https://github.com/kirodubes/${_pkgname}.git")
 sha256sums=('SKIP')
 install='readme.install'
 
@@ -69,6 +72,9 @@ package() {
 
 	install -dm755 ${pkgdir}${_destname1}
 	cp -r  ${srcdir}/${_pkgname}${_destname1}* ${pkgdir}${_destname1}
+
+	install -dm755 ${pkgdir}${_destname2}
+	cp -r  ${srcdir}/${_pkgname}${_destname2}* ${pkgdir}${_destname2}
 
 	install -dm755 ${pkgdir}${_destname5}
 	cp -r  ${srcdir}/${_pkgname}${_destname5}* ${pkgdir}${_destname5}

@@ -1,0 +1,25 @@
+# Maintainer: Erik Dubois <erik.dubois@gmail.com>
+pkgname=kiro-cinnamon
+_destname1="/usr"
+_licensedir="/usr/share/kiro/licenses/"
+pkgver=26.06
+pkgrel=100
+pkgdesc="Cinnamon defaults for Kiro — sets the Kiro wallpaper as the schema default (by Erik Dubois)"
+arch=('any')
+url="https://github.com/kirodubes/kiro-cinnamon"
+license=('GPL3')
+# The override targets the org.cinnamon.* schema; cinnamon must be present or
+# glib-compile-schemas fails the whole compile during the post-transaction hook.
+depends=('cinnamon')
+makedepends=('git')
+options=(!strip !emptydirs)
+source=("${pkgname}::git+${url}.git")
+sha256sums=('SKIP')
+
+package() {
+	install -dm755 "${pkgdir}${_licensedir}${pkgname}"
+	install -m644 "${srcdir}/${pkgname}/LICENSE" "${pkgdir}${_licensedir}${pkgname}/LICENSE"
+
+	install -dm755 "${pkgdir}${_destname1}"
+	cp -a "${srcdir}/${pkgname}/${_destname1}/." "${pkgdir}${_destname1}/"
+}
