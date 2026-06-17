@@ -3,7 +3,7 @@
 # Kiro source (fork): https://github.com/kirodubes/kiro-arc-kde
 pkgname=kiro-arc-kde
 pkgver=26.06
-pkgrel=100
+pkgrel=101
 pkgdesc="Arc theme for KDE Plasma (Kiro fork, latest master from kirodubes)"
 arch=('any')
 url="https://github.com/kirodubes/kiro-arc-kde"
@@ -30,5 +30,6 @@ prepare() {
 
 package() {
 	# shellcheck disable=SC2154
-	make -C "$pkgname" DESTDIR="$pkgdir" install
+	# IGNORE=wallpapers drops the bundled Arc wallpaper set (~21 MiB) — Kiro ships its own
+	make -C "$pkgname" DESTDIR="$pkgdir" IGNORE=wallpapers install
 }
