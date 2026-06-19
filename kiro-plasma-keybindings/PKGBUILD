@@ -3,7 +3,7 @@ pkgname=kiro-plasma-keybindings
 _destname="/usr"
 _licensedir="/usr/share/kiro/licenses/"
 pkgver=26.06
-pkgrel=100
+pkgrel=102
 pkgdesc="Kservice files for edu"
 arch=('any')
 url="https://github.com/kirodubes/kiro-plasma-keybindings"
@@ -21,5 +21,8 @@ package() {
 	install -dm755 ${pkgdir}${_licensedir}${pkgname}
 	install -m644  ${srcdir}/${pkgname}/LICENSE ${pkgdir}${_licensedir}${pkgname}
 
-	cp -r  ${srcdir}/${pkgname}${_destname} ${pkgdir}${_destname}
+	# Copy CONTENTS into the dest (the license step already created ${pkgdir}/usr,
+	# so a plain `cp -r src/usr dest/usr` would nest into dest/usr/usr).
+	install -dm755 ${pkgdir}${_destname}
+	cp -a  ${srcdir}/${pkgname}${_destname}/. ${pkgdir}${_destname}/
 }
