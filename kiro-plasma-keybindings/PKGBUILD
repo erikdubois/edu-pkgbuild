@@ -1,6 +1,6 @@
 # Maintainer: Erik Dubois <erik.dubois@gmail.com>
 pkgname=kiro-plasma-keybindings
-_destname="/etc"
+_destname="/usr"
 _licensedir="/usr/share/kiro/licenses/"
 pkgver=26.06
 pkgrel=100
