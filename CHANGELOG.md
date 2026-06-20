@@ -3,10 +3,12 @@
 ## 2026.06.20
 
 ### What Changed
-- **Added `kiro-plasma-window-management`** — new package build dir for default KWin window
-  rules. Builds from `kirodubes/kiro-plasma-window-management`, ships `kwinrulesrc` to
-  `/etc/xdg`. Payload is an empty placeholder for now (no rules captured yet) — don't
-  build until real rules exist or it ships a stray `/etc/xdg/.gitkeep`.
+- **Added `kiro-plasma-window-management`** (renamed from `kiro-plasma-kwin-rules`) —
+  new package build dir for KWin window-management config. Builds from
+  `kirodubes/kiro-plasma-window-management`, ships `/etc/xdg/kwinrc` (4 virtual
+  desktops, effects, titlebar-wheel maximize, flipswitch, ShowDesktop edge). The
+  `kwinrc` was consolidated here out of `kiro-plasma-system-settings` so only one
+  package owns `/etc/xdg/kwinrc`. Ready to build. Window rules (`kwinrulesrc`) to come.
 - **`kiro-plasma-servicemenus`** — `depends=('kdialog')` (the only hard requirement —
   used by the Checksum popup); the other helpers are `optdepends` left to the user
   (`imagemagick`, `meld`, `kdesu`, `mintstick`, `gittyup`, `code`, `alacritty`).
