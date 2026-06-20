@@ -3,6 +3,10 @@
 ## 2026.06.20
 
 ### What Changed
+- **Added `kiro-plasma-dolphin`** — new package build dir for the default Dolphin
+  configuration. Builds from `kirodubes/kiro-plasma-dolphin` into `nemesis_repo` and
+  ships a minimal `dolphinrc` to `/etc/xdg` (XDG cascade; menubar off + file-dialog
+  places sizing). Same recipe shape as `kiro-plasma-system-settings`.
 - **Added `kiro-plasma-konsole`** — new package build dir for the default Konsole
   configuration. Builds from `kirodubes/kiro-plasma-konsole` into `nemesis_repo` and
   ships the Kiro profile, ArcDark colour scheme, and `konsolerc` to `/etc/skel`.
