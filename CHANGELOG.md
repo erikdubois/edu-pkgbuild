@@ -3,6 +3,11 @@
 ## 2026.06.20
 
 ### What Changed
+- **Added `kiro-plasma-konsole`** — new package build dir for the default Konsole
+  configuration. Builds from `kirodubes/kiro-plasma-konsole` into `nemesis_repo` and
+  ships the Kiro profile, ArcDark colour scheme, and `konsolerc` to `/etc/skel`.
+  PKGBUILD models the `kiro-plasma-system-settings` recipe (`_destname="/etc"`, git+
+  source, GPL3, license under `/usr/share/kiro/licenses/`, `build.sh` md5 `ff42d7d4`).
 - **Added `kiro-plasma-system-settings`** — new package build dir for the default
   KDE Plasma System Settings configuration. Builds from
   `kirodubes/kiro-plasma-system-settings` into `nemesis_repo` and ships behavioural
