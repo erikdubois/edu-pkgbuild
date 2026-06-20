@@ -3,10 +3,11 @@
 ## 2026.06.20
 
 ### What Changed
-- **`kiro-plasma-servicemenus`** — declared the helper-app `depends` (was empty):
-  `imagemagick kdialog meld kdesu mintstick gittyup code alacritty`. De-branded the
-  `pkgdesc` ("Servicemenu files for edu" → "KDE Plasma Dolphin service-menu actions
-  for Kiro").
+- **`kiro-plasma-servicemenus`** — `depends=('kdialog')` (the only hard requirement —
+  used by the Checksum popup); the other helpers are `optdepends` left to the user
+  (`imagemagick`, `meld`, `kdesu`, `mintstick`, `gittyup`, `code`, `alacritty`).
+  De-branded the `pkgdesc` ("Servicemenu files for edu" → "KDE Plasma Dolphin
+  service-menu actions for Kiro").
 - **Added `kiro-plasma-dolphin`** — new package build dir for the default Dolphin
   configuration. Builds from `kirodubes/kiro-plasma-dolphin` into `nemesis_repo` and
   ships a minimal `dolphinrc` to `/etc/xdg` (XDG cascade; menubar off + file-dialog

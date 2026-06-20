@@ -10,7 +10,14 @@ url="https://github.com/kirodubes/kiro-plasma-servicemenus"
 license=('GPL3')
 makedepends=('git')
 conflicts=('edu-plasma-servicemenus-git')
-depends=('imagemagick' 'kdialog' 'meld' 'kdesu' 'mintstick' 'gittyup' 'code' 'alacritty')
+depends=('kdialog')
+optdepends=('imagemagick: png/jpg/webp conversions'
+            'meld: Compare using meld'
+            'kdesu: Open Thunar as root'
+            'mintstick: Format USB / Write ISO to USB'
+            'gittyup: Open with gittyup'
+            'code: Open in VSCode'
+            'alacritty: Open terminal / Open Claude Here')
 provides=("${pkgname}")
 replaces=('arcolinux-plasma-kservices-git' 'edu-plasma-servicemenus-git')
 options=(!strip !emptydirs)
