@@ -1,5 +1,44 @@
 # Changelog
 
+## 2026.06.20
+
+### What Changed
+- **Added `kiro-plasma-system-settings`** — new package build dir for the default
+  KDE Plasma System Settings configuration. Builds from
+  `kirodubes/kiro-plasma-system-settings` into `nemesis_repo` and ships behavioural
+  defaults (lock screen, logout/session, hot corner, power timeouts) to `/etc/xdg/`.
+
+### Technical Details
+- PKGBUILD modelled on `kiro-plasma-keybindings` but ships `/etc` only (no `/usr`):
+  `_destname="/etc"`, git+ source, `GPL3`, license copied under
+  `/usr/share/kiro/licenses/`. `build.sh` is the generic per-package builder
+  (copied from `kiro-plasma-keybindings`, md5 `ff42d7d4`).
+- Delivery is `/etc/xdg/` (XDG cascade defaults) rather than `/etc/skel/` —
+  verified on a Plasma 6 box that all four files are honored by the cascade.
+- `pkgrel` starts at `01`; version files are created on first build.
+
+### Files Modified
+- `kiro-plasma-system-settings/PKGBUILD`, `kiro-plasma-system-settings/build.sh`,
+  `kiro-plasma-system-settings/readme.install`
+
+## 2026.06.19
+
+### What Changed
+- **Added `kiro-grub-theme`** — a new package build dir for the Kiro-branded
+  GRUB2 boot theme. Builds from `kirodubes/kiro-grub-theme` into `nemesis_repo`
+  and installs the theme to `/boot/grub/themes/kiro/`.
+
+### Technical Details
+- PKGBUILD modelled on `kiro-rofi-themes` (git+ source, `GPL3` license, ships a
+  copy of `LICENSE` under `/usr/share/kiro/licenses/`); `build.sh` is the generic
+  per-package builder copied from `kiro-bootloader-grub`.
+- No `-nemesis` twin (matches `kiro-rofi-themes`, the closest theme-content
+  analog). Add one only if a `kiro_repo` edition is needed.
+
+### Files Modified
+- `kiro-grub-theme/PKGBUILD`, `kiro-grub-theme/build.sh`,
+  `kiro-grub-theme/readme.install`
+
 ## 2026.06.17
 
 ### What Changed
