@@ -1,0 +1,8 @@
+post_install() {
+    install -dm755 /etc/skel/.config/Kvantum
+    printf '[General]\ntheme=Kiro-Nordic\n' > /etc/skel/.config/Kvantum/kvantum.kvconfig
+}
+
+post_upgrade() {
+    post_install "$@"
+}
