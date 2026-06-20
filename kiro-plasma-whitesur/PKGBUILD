@@ -9,6 +9,7 @@ license=('GPL3')
 depends=('kvantum' 'sddm')
 makedepends=('git' 'gtk-update-icon-cache')
 provides=("${pkgname}")
+conflicts=('kiro-kvantum')
 options=(!strip !emptydirs)
 _iconurl="https://github.com/vinceliuice/WhiteSur-icon-theme.git"
 source=(${pkgname}::"git+${url}"
