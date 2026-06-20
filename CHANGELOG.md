@@ -3,6 +3,10 @@
 ## 2026.06.20
 
 ### What Changed
+- **Added `kiro-plasma-kwin-rules`** — new package build dir for default KWin window
+  rules. Builds from `kirodubes/kiro-plasma-kwin-rules`, ships `kwinrulesrc` to
+  `/etc/xdg`. Payload is an empty placeholder for now (no rules captured yet) — don't
+  build until real rules exist or it ships a stray `/etc/xdg/.gitkeep`.
 - **`kiro-plasma-servicemenus`** — `depends=('kdialog')` (the only hard requirement —
   used by the Checksum popup); the other helpers are `optdepends` left to the user
   (`imagemagick`, `meld`, `kdesu`, `mintstick`, `gittyup`, `code`, `alacritty`).
