@@ -1,5 +1,5 @@
 post_install() {
-    echo -e "\n** Kiro Plasma System Settings defaults installed to /etc/xdg — log out/in or restart Plasma to apply **\n"
+    echo -e "\n** Kiro Plasma System Settings defaults installed to /etc/xdg — reboot your system to apply **\n"
 }
 
 post_upgrade() {

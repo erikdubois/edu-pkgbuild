@@ -3,7 +3,7 @@ pkgname=kiro-plasma-keybindings
 _destname="/usr"
 _licensedir="/usr/share/kiro/licenses/"
 pkgver=26.06
-pkgrel=102
+pkgrel=107
 pkgdesc="Kservice files for edu"
 arch=('any')
 url="https://github.com/kirodubes/kiro-plasma-keybindings"
@@ -25,4 +25,11 @@ package() {
 	# so a plain `cp -r src/usr dest/usr` would nest into dest/usr/usr).
 	install -dm755 ${pkgdir}${_destname}
 	cp -a  ${srcdir}/${pkgname}${_destname}/. ${pkgdir}${_destname}/
+
+	# Skel seed: minimal kglobalshortcutsrc adding Super+Shift+Q to KWin's
+	# Close-Window action (the one binding that can't be a /usr .desktop launcher).
+	if [ -d "${srcdir}/${pkgname}/etc" ]; then
+		install -dm755 ${pkgdir}/etc
+		cp -a  ${srcdir}/${pkgname}/etc/. ${pkgdir}/etc/
+	fi
 }

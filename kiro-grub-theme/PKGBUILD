@@ -1,0 +1,43 @@
+# Maintainer: Erik Dubois <erik.dubois@gmail.com>
+pkgname=kiro-grub-theme
+_themedir="/boot/grub/themes/kiro"
+_themedirusr="/usr/share/grub/themes/kiro"
+_licensedir="/usr/share/kiro/licenses/"
+pkgver=26.06
+pkgrel=106
+pkgdesc="Kiro Linux branded GRUB2 boot theme (dark background, Kiro logo, OS icons)"
+arch=('any')
+url="https://github.com/kirodubes/kiro-grub-theme"
+license=('GPL3')
+makedepends=('git')
+depends=('grub')
+provides=("${pkgname}")
+options=(!strip !emptydirs)
+source=(${pkgname}::"git+https://github.com/kirodubes/kiro-grub-theme.git")
+sha256sums=('SKIP')
+
+package() {
+    install -dm755 "${pkgdir}${_licensedir}${pkgname}"
+    install -m644  "${srcdir}/${pkgname}/LICENSE" "${pkgdir}${_licensedir}${pkgname}/"
+
+    install -dm755 "${pkgdir}${_themedir}"
+    install -m644  "${srcdir}/${pkgname}${_themedir}/theme.txt"      "${pkgdir}${_themedir}/"
+    install -m644  "${srcdir}/${pkgname}${_themedir}/background.jpg" "${pkgdir}${_themedir}/"
+    install -m644  "${srcdir}/${pkgname}${_themedir}/info.png"       "${pkgdir}${_themedir}/"
+    install -m644  "${srcdir}/${pkgname}${_themedir}"/select_*.png   "${pkgdir}${_themedir}/"
+    install -m644  "${srcdir}/${pkgname}${_themedir}"/*.pf2          "${pkgdir}${_themedir}/"
+
+    install -dm755 "${pkgdir}${_themedir}/icons"
+    install -m644  "${srcdir}/${pkgname}${_themedir}"/icons/*.png    "${pkgdir}${_themedir}/icons/"
+
+    install -dm755 "${pkgdir}${_themedirusr}"
+    install -m644  "${srcdir}/${pkgname}${_themedir}/theme.txt"      "${pkgdir}${_themedirusr}/"
+    install -m644  "${srcdir}/${pkgname}${_themedir}/background.jpg" "${pkgdir}${_themedirusr}/"
+    install -m644  "${srcdir}/${pkgname}${_themedir}/info.png"       "${pkgdir}${_themedirusr}/"
+    install -m644  "${srcdir}/${pkgname}${_themedir}"/select_*.png   "${pkgdir}${_themedirusr}/"
+    install -m644  "${srcdir}/${pkgname}${_themedir}"/*.pf2          "${pkgdir}${_themedirusr}/"
+
+    install -dm755 "${pkgdir}${_themedirusr}/icons"
+    install -m644  "${srcdir}/${pkgname}${_themedir}"/icons/*.png    "${pkgdir}${_themedirusr}/icons/"
+
+}

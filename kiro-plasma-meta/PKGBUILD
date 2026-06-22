@@ -1,0 +1,27 @@
+# Maintainer: Erik Dubois <erik.dubois@gmail.com>
+pkgname=kiro-plasma-meta
+pkgver=26.06
+pkgrel=03
+pkgdesc="Plasma — meta package"
+arch=('any')
+url="https://github.com/kirodubes/"
+license=('Attribution-NonCommercial-ShareAlike 4.0 International Public License')
+options=(!strip !emptydirs)
+depends=(
+'kiro-plasma-dolphin'
+'kiro-plasma-keybindings'
+'kiro-plasma-konsole'
+'kiro-plasma-layan'
+'kiro-plasma-nord'
+'kiro-plasma-servicemenus'
+'kiro-plasma-sweet'
+'kiro-plasma-system-settings'
+'kiro-plasma-whitesur'
+'kiro-plasma-win11'
+#'kiro-plasma-window-management'
+)
+source=()
+
+package() {
+  :
+}
