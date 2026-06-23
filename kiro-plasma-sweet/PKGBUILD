@@ -16,5 +16,4 @@ sha256sums=('SKIP')
 
 package() {
     cp -a "${srcdir}/${pkgname}/usr" "${pkgdir}/usr"
-    cp -a "${srcdir}/${pkgname}/etc" "${pkgdir}/etc"
 }
