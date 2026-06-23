@@ -1,12 +1,12 @@
 # Maintainer: Erik Dubois <erik.dubois@gmail.com>
 pkgname=kiro-plasma-nord
 pkgver=26.06
-pkgrel=05
-pkgdesc="Nord Plasma global theme — 3 variants (Nordic, Darker, Bluish): desktoptheme, look-and-feel, aurorae, color schemes, Kvantum, SDDM, Nord icons + cursors"
+pkgrel=14
+pkgdesc="Nord Plasma global theme — 2 variants (Nordic, Darker): desktoptheme, look-and-feel, aurorae, color schemes, Kvantum, SDDM; Surfn-Mint-Y-Aqua icons + Nord cursors"
 arch=('any')
 url="https://github.com/kirodubes/kiro-plasma-nord.git"
 license=('GPL3' 'CC-BY-SA-4.0')
-depends=('papirus-icon-theme' 'kvantum' 'sddm' 'kiro-kvantum')
+depends=('surfn-mint-y-icons-git' 'kvantum' 'sddm' 'kiro-kvantum')
 makedepends=('git')
 provides=("${pkgname}")
 options=(!strip !emptydirs)
@@ -16,4 +16,5 @@ sha256sums=('SKIP')
 
 package() {
     cp -a "${srcdir}/${pkgname}/usr" "${pkgdir}/usr"
+    cp -a "${srcdir}/${pkgname}/etc" "${pkgdir}/etc"
 }
