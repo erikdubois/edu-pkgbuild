@@ -1,6 +1,6 @@
 post_install() {
     install -dm755 /etc/skel/.config/Kvantum
-    printf '[General]\ntheme=Kiro-WhiteSur\n' > /etc/skel/.config/Kvantum/kvantum.kvconfig
+    printf '[General]\ntheme=Kiro-WhiteSur-opaque\n' > /etc/skel/.config/Kvantum/kvantum.kvconfig
 }
 
 post_upgrade() {
