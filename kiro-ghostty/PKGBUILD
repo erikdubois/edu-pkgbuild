@@ -1,0 +1,24 @@
+# Maintainer: Erik Dubois <erik.dubois@gmail.com>
+pkgname=kiro-ghostty
+_destname1="/etc/skel/.config/ghostty/"
+_licensedir="/usr/share/kiro/licenses/"
+pkgver=26.06
+pkgrel=02
+pkgdesc="Kiro default Ghostty terminal config (Tokyo Night)"
+arch=('any')
+url="https://github.com/kirodubes/kiro-ghostty"
+license=('GPL3')
+makedepends=('git')
+depends=()
+provides=("${pkgname}")
+options=(!strip !emptydirs)
+source=(${pkgname}::"git+https://github.com/kirodubes/kiro-ghostty.git")
+sha256sums=('SKIP')
+install='readme.install'
+package() {
+	install -dm755 ${pkgdir}${_licensedir}${pkgname}
+	install -m644  ${srcdir}/${pkgname}/LICENSE ${pkgdir}${_licensedir}${pkgname}
+
+	install -dm755 ${pkgdir}${_destname1}
+	cp -r  ${srcdir}/${pkgname}${_destname1}* ${pkgdir}${_destname1}
+}

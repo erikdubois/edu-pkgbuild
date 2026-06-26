@@ -1,0 +1,20 @@
+# Maintainer: Erik Dubois <erik.dubois@gmail.com>
+pkgname=kiro-bash-config
+_destname1="/etc/skel/"
+pkgver=26.06
+pkgrel=02
+pkgdesc="Bash shell configuration for Kiro"
+arch=('any')
+url="https://github.com/kirodubes/kiro-bash-config"
+license=('GPL3')
+makedepends=('git')
+depends=('bash')
+provides=("${pkgname}")
+options=(!strip !emptydirs)
+source=(${pkgname}::"git+${url}.git")
+sha256sums=('SKIP')
+install='readme.install'
+package() {
+    install -dm755 "${pkgdir}${_destname1}"
+    cp -a "${srcdir}/${pkgname}${_destname1}".* "${pkgdir}${_destname1}"
+}
