@@ -1,0 +1,29 @@
+# Maintainer: Erik Dubois <erik.dubois@gmail.com>
+#
+# Subfolder-extraction recipe: clones an existing Kiro GitHub repo and ships
+# only one subfolder from it as a standalone package. No dedicated source repo.
+# To reuse for another extraction, change pkgname, _srcrepo, _destname* and the
+# conflicts/pkgdesc lines.
+pkgname=kiro-thunar
+_srcrepo="kiro-xfce"                       # upstream GitHub repo to clone
+_destname1="/etc/skel/.config/Thunar/"     # subfolder to extract
+_licensedir="/usr/share/kiro/licenses/"
+pkgver=26.06
+pkgrel=01
+pkgdesc="Default Thunar file manager configuration for Kiro (extracted from kiro-xfce)"
+arch=('any')
+url="https://github.com/kirodubes/${_srcrepo}"
+license=('GPL3')
+makedepends=('git')
+depends=()
+conflicts=('kiro-xfce')
+options=(!strip !emptydirs)
+source=(${_srcrepo}::"git+https://github.com/kirodubes/${_srcrepo}.git")
+sha256sums=('SKIP')
+install='readme.install'
+package() {
+	mkdir -p "${pkgdir}${_licensedir}${pkgname}"
+	cp "${srcdir}/${_srcrepo}/"LICENSE "${pkgdir}${_licensedir}${pkgname}/LICENSE"
+	mkdir -p "${pkgdir}${_destname1}"
+	cp -r "${srcdir}/${_srcrepo}/${_destname1}/"* "${pkgdir}${_destname1}"
+}
