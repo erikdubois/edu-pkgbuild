@@ -1,0 +1,22 @@
+# Maintainer: Erik Dubois <erik.dubois@gmail.com>
+pkgname=kiro-plank
+_destname1="/etc/skel/.config/plank/"
+_licensedir="/usr/share/kiro/licenses/"
+pkgver=26.06
+pkgrel=01
+pkgdesc="Default Plank dock configuration for Kiro"
+arch=('any')
+url="https://github.com/kirodubes/kiro-plank"
+license=('GPL3')
+makedepends=('git')
+depends=()
+options=(!strip !emptydirs)
+source=(${pkgname}::"git+https://github.com/kirodubes/kiro-plank.git")
+sha256sums=('SKIP')
+install='readme.install'
+package() {
+	mkdir -p "${pkgdir}${_licensedir}${pkgname}"
+	mv "${srcdir}/${pkgname}/"LICENSE "${pkgdir}${_licensedir}${pkgname}/LICENSE"
+	mkdir -p "${pkgdir}${_destname1}"
+	cp -r "${srcdir}/${pkgname}/${_destname1}/"* "${pkgdir}${_destname1}"
+}
