@@ -1,0 +1,28 @@
+# Maintainer: Erik Dubois <erik.dubois@gmail.com>
+pkgname=kiro-ohmychadwm-hook
+_pkgname=kiro-ohmychadwm-hook
+pkgver=26.06
+pkgrel=01
+pkgdesc="Pacman hook that recompiles a user's personalised chadwm after an ohmychadwm/kiro-chadwm upgrade"
+arch=('any')
+url="https://github.com/kirodubes/kiro-ohmychadwm-hook"
+license=('GPL3')
+depends=(
+	'bash'
+	'gcc'
+	'make'
+	'util-linux'
+)
+options=(!strip !emptydirs)
+source=(${_pkgname}::"git+${url}.git")
+sha256sums=('SKIP')
+
+package() {
+	cd "${srcdir}/${_pkgname}"
+
+	install -Dm644 usr/share/libalpm/hooks/kiro-ohmychadwm-hook.hook \
+		"${pkgdir}/usr/share/libalpm/hooks/kiro-ohmychadwm-hook.hook"
+
+	install -Dm755 usr/share/libalpm/scripts/kiro-ohmychadwm-hook \
+		"${pkgdir}/usr/share/libalpm/scripts/kiro-ohmychadwm-hook"
+}
