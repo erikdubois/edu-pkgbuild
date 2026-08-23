@@ -1,5 +1,64 @@
 # Changelog
 
+## 2026.08.23
+
+### What Changed
+- **`ohmychadwm/readme.install` — the "already built?" guard tested a binary name that never
+  exists.** `post_install()` skipped the local build only when `command -v chadwm` succeeded, but
+  the Makefile under `etc/skel/.config/ohmychadwm/chadwm/` produces a binary called **`ohmychadwm`**
+  (`cp -f ohmychadwm ${DESTDIR}${PREFIX}/bin`, `PREFIX = /usr/local`). Nothing on a Kiro system
+  provides a `chadwm` binary, so the guard never matched: every install and every upgrade of the
+  package recompiled from `/etc/skel` and `make install`-ed an **unowned** `/usr/local/bin/ohmychadwm`
+  that shadows the packaged `/usr/bin/ohmychadwm` on `PATH`. Found on the v26.08.23 VM, where both
+  copies are byte-identical (md5 `2ded2091…`) and `pacman -Qo` reports no owner.
+
+### Technical Details
+- The guard now tests `command -v ohmychadwm`, so the local build runs once at most and a machine
+  that already has the packaged binary is left alone.
+- The three sibling messages that name the *binary* were corrected with it; the ones naming the
+  **source directory** (`chadwm build folder not found`, the `make` step messages, `CHADWM_DIR`)
+  are left as-is — that directory really is called `chadwm`.
+- The `slstatus` half of the same script was checked and is correct: its Makefile installs
+  `slstatus`, which is the name its guard tests. Note `slstatus` is packaged nowhere else, so
+  `/usr/local/bin/slstatus` is load-bearing — it must keep being built here.
+- Takes effect on the next `ohmychadwm` rebuild; existing installs keep the shadowing copy until
+  it is removed by hand.
+
+### Files Modified
+- `ohmychadwm/readme.install`
+
+## 2026.06.29
+
+### What Changed
+- **Added `build-twm-xfce-packages.sh`** — batch push+build+publish for all Kiro
+  tiling window managers (`ohmychadwm`, `kiro-chadwm`, `kiro-awesome`,
+  `kiro-bspwm`, `kiro-i3`, `kiro-leftwm`, `kiro-qtile`) plus `kiro-xfce`. In
+  order it (1) pushes each source repo `~/KIRO/<name>` to GitHub via its own
+  `up.sh`, (2) builds each package from its `build.sh` here, (3) publishes once
+  with `~/EDU/nemesis_repo/up.sh`. The push step is required because the build
+  dirs pull `kirodubes/<name>` as a `git+` source — without it the chroot builds
+  stale config. Modelled on `build-skel-hint-packages.sh`. Use after a
+  cross-environment change such as propagating ohmychadwm's keybindings to every
+  other TWM + XFCE.
+
+### Files Modified
+- `build-twm-xfce-packages.sh` (new)
+
+## 2026.06.28
+
+### What Changed
+- **Added `kiro-starship`** — new package build dir for the default Starship
+  prompt configuration. Builds from `kirodubes/kiro-starship` into `nemesis_repo`
+  and ships `etc/skel/.config/starship.toml` to `/etc/skel` (new users inherit it
+  automatically). `depends=('starship')`. PKGBUILD models the `kiro-fish-config`
+  recipe (git+ source, GPL3, `provides`, `.install` post-install hint). build.sh
+  copied from `kiro-fish-config`.
+
+### Files Modified
+- `kiro-starship/PKGBUILD` (new)
+- `kiro-starship/kiro-starship.install` (new)
+- `kiro-starship/build.sh` (new)
+
 ## 2026.06.20
 
 ### What Changed

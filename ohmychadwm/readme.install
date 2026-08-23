@@ -23,9 +23,9 @@ post_install() {
         echo "ohmychadwm config already exists, skipping..."
     fi
 
-    # Build and install chadwm if not already installed
-    if ! command -v chadwm >/dev/null 2>&1; then
-        echo "chadwm not found. Building and installing chadwm..."
+    # Build and install ohmychadwm if not already installed
+    if ! command -v ohmychadwm >/dev/null 2>&1; then
+        echo "ohmychadwm not found. Building and installing ohmychadwm..."
 
         if [ -d "$CHADWM_DIR" ]; then
             cd "$CHADWM_DIR" || return 1
@@ -49,7 +49,7 @@ post_install() {
             echo "WARNING: chadwm build folder not found: $CHADWM_DIR"
         fi
     else
-        echo "chadwm already installed, skipping..."
+        echo "ohmychadwm already installed, skipping..."
     fi
 
     # Build and install slstatus if not already installed
