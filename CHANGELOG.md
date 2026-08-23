@@ -11,6 +11,15 @@
   package recompiled from `/etc/skel` and `make install`-ed an **unowned** `/usr/local/bin/ohmychadwm`
   that shadows the packaged `/usr/bin/ohmychadwm` on `PATH`. Found on the v26.08.23 VM, where both
   copies are byte-identical (md5 `2ded2091…`) and `pacman -Qo` reports no owner.
+- **`kiro-chadwm/readme.install` — the last `arco-chadwm` path, three months after the rename.**
+  `SKEL_DIR` still pointed at `/etc/skel/.config/arco-chadwm`, but the folder was renamed to
+  `.config/chadwm` on 2026-05-24 as part of the Kiro de-brand ("path token `arco-chadwm` →
+  `chadwm` rewritten across all 10 referencing files in one pass"). That pass covered the
+  `kiro-chadwm` **source** repo; this file lives in `KIRO-PKG-BUILD-APPS`, so it was missed.
+  Effect: `post_install()` tested a directory that no longer exists, printed
+  `WARNING: … does not exist. Skipping chadwm setup.` and returned early — never copying the
+  config to the user and never building chadwm. Latent rather than shipping-broken:
+  `kiro-chadwm` is commented out in the ISO's `packages.x86_64`.
 
 ### Technical Details
 - The guard now tests `command -v ohmychadwm`, so the local build runs once at most and a machine
@@ -21,11 +30,17 @@
 - The `slstatus` half of the same script was checked and is correct: its Makefile installs
   `slstatus`, which is the name its guard tests. Note `slstatus` is packaged nowhere else, so
   `/usr/local/bin/slstatus` is load-bearing — it must keep being built here.
+- `kiro-chadwm`: `SKEL_DIR` and `USER_CONFIG_DIR` now use `chadwm`; `BUILD_DIR` was already
+  correct (`$SKEL_DIR/chadwm` — the inner build dir really is called `chadwm`), as was the
+  `[ ! -f /usr/local/bin/chadwm ]` guard, since that Makefile does install a `chadwm` binary.
+- The two user-visible `** Building / Installing ArcoLinux Chadwm **` banners in the same file
+  became `Kiro Chadwm`, finishing the brand sweep the 2026-05-24 entry set out to do.
 - Takes effect on the next `ohmychadwm` rebuild; existing installs keep the shadowing copy until
   it is removed by hand.
 
 ### Files Modified
 - `ohmychadwm/readme.install`
+- `kiro-chadwm/readme.install`
 
 ## 2026.06.29
 

@@ -2,8 +2,8 @@ post_install() {
     USER_NAME="${SUDO_USER:-$USER}"
     USER_HOME=$(getent passwd "$USER_NAME" | cut -d: -f6)
 
-    SKEL_DIR="/etc/skel/.config/arco-chadwm"
-    USER_CONFIG_DIR="$USER_HOME/.config/arco-chadwm"
+    SKEL_DIR="/etc/skel/.config/chadwm"
+    USER_CONFIG_DIR="$USER_HOME/.config/chadwm"
     BUILD_DIR="$SKEL_DIR/chadwm"
 
     # --- Check if skel config exists ---
@@ -14,17 +14,17 @@ post_install() {
 
     # --- Copy config to user ---
     if [ -n "$USER_HOME" ] && [ ! -d "$USER_CONFIG_DIR" ]; then
-        echo "Copying arco-chadwm config to user home..."
+        echo "Copying chadwm config to user home..."
         cp -r "$SKEL_DIR" "$USER_HOME/.config/"
         chown -R "$USER_NAME":"$USER_NAME" "$USER_CONFIG_DIR"
     else
-        echo "arco-chadwm config already exists, skipping..."
+        echo "chadwm config already exists, skipping..."
     fi
 
     # --- Build chadwm ---
     if [ ! -f /usr/local/bin/chadwm ]; then
         if [ -d "$BUILD_DIR" ]; then
-            echo -e "\n** Building ArcoLinux Chadwm **\n"
+            echo -e "\n** Building Kiro Chadwm **\n"
             cd "$BUILD_DIR" || return 1
 
             # Clean first (ignore errors if nothing to clean)
@@ -33,7 +33,7 @@ post_install() {
             # Force rebuild
             make -B
 
-            echo -e "\n** Installing ArcoLinux Chadwm **\n"
+            echo -e "\n** Installing Kiro Chadwm **\n"
             make install
 
             echo -e "\n** Installed from $BUILD_DIR **\n"
